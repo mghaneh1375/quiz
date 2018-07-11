@@ -1,14 +1,26 @@
 <?php
 
-class TarazController extends BaseController {
+namespace App\Http\Controllers;
+
+use App\models\CompassesPercent;
+use App\models\Enheraf;
+use App\models\QEntry;
+use App\models\QOQ;
+use App\models\Quiz;
+use App\models\ROQ;
+use App\models\SubjectsPercent;
+use App\models\Taraz;
+use Illuminate\Support\Facades\DB;
+
+class TarazController extends Controller {
 
     function fillSubjectsPercentTable($quizId) {
 
-        SubjectsPercent::where('qId', '=', $quizId)->delete();
+        SubjectsPercent::whereQId($quizId)->delete();
 
         $minusMark = Quiz::whereId($quizId)->minusMark;
 
-        $uIds = QEntry::whereQId($quizId)->orderBy('uId', 'ASC')->select('uId')->get();
+        $uIds = QEntry::whereQId($quizId)->orderBy('u_id', 'ASC')->select('u_id')->get();
 
         $sIds = DB::select('select DISTINCT questions.subject_id as sId FROM questions, qoq WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
         $cIds = DB::select('select DISTINCT questions.compass_id as cId FROM questions, qoq WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
@@ -41,7 +53,7 @@ class TarazController extends BaseController {
 
 
         foreach ($qoqs as $qoq) {
-            $roqs = ROQ::where('qoqId', '=', $qoq->qoqId)->orderBy('uId', 'ASC')->select('result', 'uId')->get();
+            $roqs = ROQ::whereQOQId($qoq->qoqId)->orderBy('u_id', 'ASC')->select('result', 'uId')->get();
 
             $totals[$qoq->sId]++;
             $totalsC[$qoq->cId]++;
@@ -68,9 +80,9 @@ class TarazController extends BaseController {
         foreach ($uIds as $uId) {
             foreach ($sIds as $sId) {
                 $subjectsPercent = new SubjectsPercent();
-                $subjectsPercent->qId = $quizId;
-                $subjectsPercent->sId = $sId->sId;
-                $subjectsPercent->uId = $uId->uId;
+                $subjectsPercent->q_id = $quizId;
+                $subjectsPercent->s_id = $sId->sId;
+                $subjectsPercent->u_id = $uId->uId;
 
                 if($minusMark)
                     $subjectsPercent->percent =
@@ -82,16 +94,16 @@ class TarazController extends BaseController {
                 try {
                     $subjectsPercent->save();
                 }
-                catch (Exception $x) {
+                catch (\Exception $x) {
                     return -1;
                 }
 
             }
             foreach ($cIds as $cId) {
                 $compassesPercent = new CompassesPercent();
-                $compassesPercent->qId = $quizId;
-                $compassesPercent->cId = $cId->cId;
-                $compassesPercent->uId = $uId->uId;
+                $compassesPercent->q_id = $quizId;
+                $compassesPercent->c_id = $cId->cId;
+                $compassesPercent->u_id = $uId->uId;
 
                 if($minusMark)
                     $compassesPercent->percent =
@@ -102,7 +114,7 @@ class TarazController extends BaseController {
                 try {
                     $compassesPercent->save();
                 }
-                catch (Exception $x) {
+                catch (\Exception $x) {
                     return -1;
                 }
             }
@@ -115,7 +127,7 @@ class TarazController extends BaseController {
 
     public function getEnherafMeyar($lId, $lessonAvg, $quizId) {
 
-        $percents = DB::select('select percent from taraz, qEntry qe WHERE taraz.l_id = ' . $lId .' and taraz.q_entry_id = qe.id AND qe.qId = '. $quizId);
+        $percents = DB::select('select percent from taraz, qEntry qe WHERE taraz.l_id = ' . $lId .' and taraz.q_entry_id = qe.id AND qe.q_id = '. $quizId);
         $sum = 0.0;
         for($i = 0; $i < count($percents); $i++)
             $sum += pow($percents[$i]->percent - $lessonAvg, 2);
@@ -123,9 +135,9 @@ class TarazController extends BaseController {
         $sum = sqrt($sum);
 
         $tmp = new Enheraf();
-        $tmp->lId = $lId;
+        $tmp->l_id = $lId;
         $tmp->lessonAVG = $lessonAvg;
-        $tmp->qId = $quizId;
+        $tmp->q_id = $quizId;
         $tmp->val = $sum;
         $tmp->save();
     }
@@ -140,7 +152,7 @@ class TarazController extends BaseController {
 			
             try {
 
-                $notFounded = DB::select('SELECT DISTINCT(roq.u_id) FROM `roq`, qoq WHERE uId not in (SELECT uId from qentry WHERE qId = ' . $quizId . ') and qoqId = qoq.id and qoq.quiz_id = ' . $quizId);
+                $notFounded = DB::select('SELECT DISTINCT(roq.u_id) FROM `roq`, qoq WHERE uId not in (SELECT uId from qentry WHERE qId = ' . $quizId . ') and qoq_id = qoq.id and qoq.quiz_id = ' . $quizId);
 
 
                 include_once 'Date.php';
@@ -148,22 +160,22 @@ class TarazController extends BaseController {
                 foreach ($notFounded as $itr) {
 
                     try {
-                        $tmp = new qEntry();
-                        $tmp->qId = $quizId;
+                        $tmp = new QEntry();
+                        $tmp->q_id = $quizId;
                         $tmp->timeEntry = time();
                         $tmp->dateEntry = getToday()["date"];
                         $tmp->status = 1;
-                        $tmp->uId = $itr->uId;
+                        $tmp->u_id = $itr->uId;
                         $tmp->save();
                     }
-                    catch (Exception $x) {
+                    catch (\Exception $x) {
                         dd($x->getMessage());
                     }
 
                 }
 
                 $this->checkDataQ($quizId);
-                $qEntryIds = qEntry::where('qId', '=', $quizId)->select('uId', 'id')->get();
+                $qEntryIds = QEntry::whereQId($quizId)->select('uId', 'id')->get();
 
                 $avgs = $this->getAverageLessons($quizId, $qEntryIds);
 
@@ -182,12 +194,12 @@ class TarazController extends BaseController {
                 $tmp = array();
                 for ($i = 0; $i < count($qEntryIds); $i++) {
                     foreach ($qoqs as $qoq) {
-                        $condition = ['uId' => $qEntryIds[$i]->uId, 'qoqId' => $qoq->id];
+                        $condition = ['u_id' => $qEntryIds[$i]->uId, 'qoq_id' => $qoq->id];
                         if(ROQ::where($condition)->count() == 0) {
                             $roq = new ROQ();
-                            $roq->qoqId = $qoq->id;
+                            $roq->qoq_id = $qoq->id;
                             $roq->result = 0;
-                            $roq->uId = $qEntryIds[$i]->uId;
+                            $roq->u_id = $qEntryIds[$i]->uId;
                             $roq->save();
                         }
                     }
@@ -197,7 +209,7 @@ class TarazController extends BaseController {
                 return view('createTaraz', array('quiz_id' => $quizId, 'qEntryIds' => $tmp));
 
             }
-            catch (Exception $e){
+            catch (\Exception $e){
                 if($e->getMessage() == 'quiz_end_time_error')
                     $msg = "زمان آزمون مورد نظر هنوز به اتمام نرسیده است";
                 else if($e->getMessage() == 'duplicate_error')
@@ -216,10 +228,10 @@ class TarazController extends BaseController {
         if(isset($_POST["createTaraz"])) {
             $quizId = makeValidInput($_POST["quiz_id"]);
 
-            DB::select('delete from taraz where qEntryId IN (SELECT id from qEntry where qId = ' . $quizId . ')');
-            SubjectsPercent::where('qId', '=', $quizId)->delete();
+            DB::select('delete from taraz where q_entry_id IN (SELECT id from qentry where q_id = ' . $quizId . ')');
+            SubjectsPercent::whereQId($quizId)->delete();
             Enheraf::whereQId($quizId)->delete();
-            CompassesPercent::where('qId', '=', $quizId)->delete();
+            CompassesPercent::whereQId( $quizId)->delete();
             
             $msg = "جدول تراز آزمون مورد نظر با موفقیت حذف گردید";
 
@@ -237,11 +249,11 @@ class TarazController extends BaseController {
         $quiz = Quiz::whereId($qId);
 
         if($date["date"] < $quiz->eDate || $date["date"] == $quiz->eDate && $date["time"] < $quiz->eTime)
-            throw new Exception('quiz_end_time_error');
+            throw new \Exception('quiz_end_time_error');
         
-        $tmp = DB::select('SELECT id FROM taraz WHERE qEntryId IN (SELECT id FROM qentry WHERE qId = ' . $qId . ')');
+        $tmp = DB::select('SELECT id FROM taraz WHERE q_entry_id IN (SELECT id FROM qentry WHERE q_id = ' . $qId . ')');
         if($tmp != null && count($tmp) > 0)
-            throw new Exception('duplicate_error');
+            throw new \Exception('duplicate_error');
     }
 
     private function getAverageLesson($lId, $qId, $qEntryIds) {
@@ -254,7 +266,7 @@ class TarazController extends BaseController {
             $tmpTotal = $tmpCorrects = $tmpInCorrects = 0;
 
             for($j = 0; $j < count($questionIds); $j++) {
-                $conditions = ['qoqId' => $questionIds[$j]->id, 'uId' => $qEntryIds[$i]->uId];
+                $conditions = ['qoq_id' => $questionIds[$j]->id, 'u_id' => $qEntryIds[$i]->uId];
                 $stdAns = ROQ::where($conditions)->select('result')->get();
 
                 $tmpTotal++;
@@ -267,7 +279,7 @@ class TarazController extends BaseController {
                 }
             }
 
-            $conditions = ["qEntryId" => $qEntryIds[$i]->id, 'lId' => $lId];
+            $conditions = ["q_entry_id" => $qEntryIds[$i]->id, 'l_id' => $lId];
             $taraz = Taraz::where($conditions)->first();
             if($taraz != null) {
 
@@ -289,7 +301,7 @@ class TarazController extends BaseController {
                         $taraz->percent = round($tmpCorrects / $tmpTotal * 100, 2);
                     $taraz->save();
                 }
-                catch (Exception $x){
+                catch (\Exception $x){
                     dd($x->getMessage());
                 }
 

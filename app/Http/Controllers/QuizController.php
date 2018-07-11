@@ -1,8 +1,27 @@
 <?php
 
+namespace App\Http\Controllers;
+
+use App\models\Box;
+use App\models\BoxesOfQuiz;
+use App\models\BoxItems;
+use App\models\Compass;
+use App\models\Degree;
+use App\models\DegreeOfQuiz;
+use App\models\KindKarname;
+use App\models\QEntry;
+use App\models\QOQ;
+use App\models\Quiz;
+use App\models\QuizStatus;
+use App\models\ROQ;
+use App\models\Subject;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
+
 include_once 'Date.php';
 
-class QuizController extends BaseController {
+class QuizController extends Controller {
 
     private function uploadCheck($target_file, $name, $section, $limitSize, $ext) {
         $err = "";
@@ -31,7 +50,7 @@ class QuizController extends BaseController {
         try {
             move_uploaded_file($_FILES[$name]["tmp_name"], $target_file);
         }
-        catch (Exception $x) {
+        catch (\Exception $x) {
             return "اشکالی در آپلود تصویر در قسمت " . $section . " به وجود آمده است" . "<br />";
         }
         return "";
@@ -127,7 +146,7 @@ class QuizController extends BaseController {
         else if(isset($_POST["removeStatus"])) {
 
             $quizStatusId = makeValidInput($_POST["removeStatus"]);
-            $quizStatus = QuizStatus::find($quizStatusId);
+            $quizStatus = QuizStatus::whereId($quizStatusId);
 
             if($quizStatus != null) {
 
@@ -157,7 +176,7 @@ class QuizController extends BaseController {
             $items = BoxItems::whereBoxId($boxId)->get();
             for($i = 0; $i < count($items); $i++) {
                 $conditions = ["compass_id" => $items[$i]->compass_id, 'grade' => $items[$i]->grade];
-                $questions[$i] = Subject::find($items[$i]->subject_id)->questions()->where($conditions)->select('questions.id', 'questions.organizationId')->get();
+                $questions[$i] = Subject::whereId($items[$i]->subject_id)->questions()->where($conditions)->select('questions.id', 'questions.organization_id')->get();
                 $subject = Subject::whereId($items[$i]->subject_id)->select('subjects.nameSubject')->get();
                 if(count($subject) > 0)
                     $items[$i]->subject_id = $subject[0]->nameSubject;
@@ -181,7 +200,7 @@ class QuizController extends BaseController {
                     $tmp = explode('_', $qoqId);
                     $qoqId = $tmp[0];
                     $questionId = $tmp[1];
-                    $qoqTmp = QOQ::find($qoqId);
+                    $qoqTmp = QOQ::whereId($qoqId);
                     $qoqTmp->question_id = $questionId;
                     $qoqTmp->save();
                 }
@@ -204,7 +223,7 @@ class QuizController extends BaseController {
             $conditions = ['quiz_id' => $quizId, 'box_id' => $boxId];
             if(BoxesOfQuiz::where($conditions)->count() == 0) {
 
-                $boxesOfQuizTmp = BoxesOfQuiz::where('quiz_id', '=', $quizId)->select('box_id')->get();
+                $boxesOfQuizTmp = BoxesOfQuiz::whereQuizId($quizId)->select('box_id')->get();
                 $froms = array();
                 $toes = array();
                 for($i = 0; $i < count($boxesOfQuizTmp); $i++) {
@@ -236,7 +255,7 @@ class QuizController extends BaseController {
 
                     for ($i = 0; $i < count($itemsTmp); $i++) {
                         $conditions = ['compass_id' => $itemsTmp[$i]->compass_id, 'grade' => $itemsTmp[$i]->grade];
-                        $questionId = Subject::find($itemsTmp[$i]->subject_id)->questions()->where($conditions)->select('questions.id')->first();
+                        $questionId = Subject::whereId($itemsTmp[$i]->subject_id)->questions()->where($conditions)->select('questions.id')->first();
                         if ($questionId == null || count($questionId) == 0) {
                             $msg = "سوالی در جعبه ی مورد نظر قرار نمی گیرد";
                             break;
@@ -293,7 +312,7 @@ class QuizController extends BaseController {
             foreach ($degrees as $degree) {
                 $degreeOfQuiz = new DegreeOfQuiz;
                 $degreeOfQuiz->quiz_id = $quizId;
-                $degreeOfQuiz->degreeId = makeValidInput($degree);
+                $degreeOfQuiz->degree_id = makeValidInput($degree);
                 $degreeOfQuiz->save();
             }
             return Redirect::to('addQuestionToQuiz='.$quizId);
@@ -384,7 +403,6 @@ class QuizController extends BaseController {
             }
 
             $newQuiz->QN = $qName;
-            $newQuiz->classId = 1;
             $newQuiz->tL = $timeLen;
             $newQuiz->author = "admin";
             $newQuiz->sDate = $sDateTmp;
@@ -405,7 +423,7 @@ class QuizController extends BaseController {
         else if(isset($_POST["editDegree"])) {
             $url = URL('editQuiz') . "=" . $quizId;
             $degrees = Degree::all();
-            $selectedDegree = DegreeOfQuiz::where('quiz_id', '=', $quizId)->select('degreeId')->get();
+            $selectedDegree = DegreeOfQuiz::whereQuizId($quizId)->select('degree_id')->get();
             return view('addDegreeToQuiz', array('url' => $url, 'msg' => '', 'quiz_id' => $quizId, 'degrees' => $degrees, 'selectedDegrees' => $selectedDegree));
         }
 
@@ -414,16 +432,16 @@ class QuizController extends BaseController {
                 $msg = 'پایه ی تحصیلی ای برای آزمون خود انتخاب نمایید';
                 $url = URL('editQuiz') . "=" . $quizId;
                 $degrees = Degree::all();
-                $selectedDegree = DegreeOfQuiz::where('quiz_id', '=', $quizId)->select('degreeId')->get();
+                $selectedDegree = DegreeOfQuiz::whereQuizId($quizId)->select('degree_id')->get();
                 return view('addDegreeToQuiz', array('url' => $url, 'msg' => $msg, 'quiz_id' => $quizId, 'degrees' => $degrees, 'selectedDegrees' => $selectedDegree));
             }
             else {
                 $degrees = $_POST["degrees"];
-                DegreeOfQuiz::where('quiz_id', '=', $quizId)->delete();
+                DegreeOfQuiz::whereQuizId($quizId)->delete();
                 foreach ($degrees as $degree) {
                     $degreeOfQuiz = new DegreeOfQuiz;
                     $degreeOfQuiz->quiz_id = $quizId;
-                    $degreeOfQuiz->degreeId = makeValidInput($degree);
+                    $degreeOfQuiz->degree_id = makeValidInput($degree);
                     $degreeOfQuiz->save();
                 }
                 $msg = "ویرایش پایه های تحصیلی آزمون به درستی انجام پذیرفت";
@@ -484,7 +502,6 @@ class QuizController extends BaseController {
             $newQuiz = new Quiz;
 
             $newQuiz->QN = $qName;
-            $newQuiz->classId = 1;
             $newQuiz->tL = $timeLen;
             $newQuiz->author = "admin";
             $newQuiz->sDate = $sDateTmp;
@@ -572,9 +589,9 @@ class QuizController extends BaseController {
             $qoqIds = QOQ::whereQuizId($quizId)->select('id')->get();
             for($i = 0; $i < count($qoqIds); $i++) {
                 $roq = new ROQ();
-                $roq->qoqId = $qoqIds[$i]->id;
+                $roq->qoq_id = $qoqIds[$i]->id;
                 $roq->result = 0;
-                $roq->uId = $uId;
+                $roq->u_id = $uId;
                 $roq->save();
             }
         }
@@ -587,7 +604,7 @@ class QuizController extends BaseController {
         if($degree == -1 && Auth::user()->role == 1)
             $quizes = DegreeOfQuiz::select('quiz_id')->get();
         else
-            $quizes = DegreeOfQuiz::where('degreeId', '=', $degree)->select('quiz_id')->get();
+            $quizes = DegreeOfQuiz::whereDegreeId($degree)->select('quiz_id')->get();
 
         $validQuizes = array();
         $counter = 0;
@@ -624,9 +641,9 @@ class QuizController extends BaseController {
                 if($entry == null || count($entry) == 0) {
                     $tmp = $this->checkDate($qId);
                     if($tmp != "0" && $tmp != "-1") {
-                        $entry = new qentry();
-                        $entry->uId = $uId;
-                        $entry->qId = $qId;
+                        $entry = new QEntry();
+                        $entry->u_id = $uId;
+                        $entry->q_id = $qId;
                         $date_time = getToday();
                         $entry->timeEntry = time();
                         $entry->dateEntry = $date_time["date"];
@@ -645,7 +662,7 @@ class QuizController extends BaseController {
                     $uId = Auth::user()->id;
                     if ($uId != -1) {
                         for ($i = 0; $i < count($qInfo); $i++) {
-                            $condition = ['uId' => $uId, 'qoqId' => $qInfo[$i][count($qInfo[$i]) - 1]];
+                            $condition = ['u_id' => $uId, 'qoq_id' => $qInfo[$i][count($qInfo[$i]) - 1]];
                             $roqs[$i] = ROQ::where($condition)->select('result')->first()->result;
                         }
                     }

@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Http\Controllers;
+
 use App\models\Box;
 use App\models\BoxItems;
 use App\models\Compass;
@@ -19,11 +21,11 @@ use Illuminate\Support\Facades\Session;
 
 include_once 'Common.php';
 
-class AjaxController extends BaseController {
+class AjaxController extends Controller {
 
     public function getLessons() {
 
-        $degreeId = makeValidInput($_POST["degreeId"]);
+        $degreeId = makeValidInput($_POST["degree_id"]);
         $lessons = Degree::whereId($degreeId)->lessons()->get();
         foreach ($lessons as $lesson)
             echo "<option value='".$lesson->id."'>".$lesson->nameL."</option>";
@@ -31,7 +33,7 @@ class AjaxController extends BaseController {
 
     public function getLessonsWithSelected() {
 
-        $degreeId = makeValidInput($_POST["degreeId"]);
+        $degreeId = makeValidInput($_POST["degree_id"]);
         $selectedLesson = makeValidInput($_POST["selectedLesson"]);
         $lessons = Degree::whereId($degreeId)->lessons()->get();
         foreach ($lessons as $lesson) {

@@ -99,7 +99,7 @@
                 }
 
                 getCompasses(compassIds);
-                changeDegreeWithSelectedLesson($("#degreeId").find(":selected").val(), 'lessonId', subjectIds, compassIds, grades, selectedLesson, box_id);
+                changeDegreeWithSelectedLesson($("#degree_id").find(":selected").val(), 'lessonId', subjectIds, compassIds, grades, selectedLesson, box_id);
             });
 
             function submitNewBox() {
@@ -182,7 +182,7 @@
                 <div class="col-xs-12">
                     <label>
                         <span>پایه ی تحصیلی</span>
-                        <select id="degreeId" onchange="changeDegree(this.value, 'lessonId', subjectIds)">
+                        <select id="degree_id" onchange="changeDegree(this.value, 'lessonId', subjectIds)">
                             @foreach($degrees as $degree)
                                 @if($degree->id == $selectedDegree)
                                     <option selected value="{{$degree->id}}">{{$degree->dN}}</option>

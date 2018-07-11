@@ -121,8 +121,8 @@ class HomeController extends Controller {
             for($j = 0; $j < count($users); $j++) {
                 $rand = rand(0, 4);
                 $roq = new ROQ();
-                $roq->uId = $users[$j]->id;
-                $roq->qoqId = $qoqIds[$i]->id;
+                $roq->u_id = $users[$j]->id;
+                $roq->qoq_id = $qoqIds[$i]->id;
                 $roq->result = $rand;
                 $roq->save();
             }

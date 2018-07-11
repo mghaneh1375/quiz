@@ -1,8 +1,14 @@
 <?php
 
+namespace App\Http\Controllers;
+
+use App\models\Quiz;
+use App\models\ROQ;
+use Illuminate\Support\Facades\DB;
+
 include_once __DIR__ . '/EXCEL/PHPExcel.php';
 
-class ReportController extends BaseController {
+class ReportController extends Controller {
 
     private $girlSex = 0;
 
@@ -22,19 +28,19 @@ class ReportController extends BaseController {
         $questions = DB::select("SELECT questions.ans, qoq.id as qoqId FROM qoq, questions, subjects WHERE qoq.quiz_id = " . $qId . " AND qoq.question_id = questions.id and subjects.id = questions.subject_id and subjects.id_l = " . $lId);
         foreach($questions as $question) {
 
-            $conditions = ['qoqId' => $question->qoqId, 'result' => 0];
+            $conditions = ['qoq_id' => $question->qoqId, 'result' => 0];
             $question->result0 = ROQ::where($conditions)->count();
 
-            $conditions = ['qoqId' => $question->qoqId, 'result' => 1];
+            $conditions = ['qoq_id' => $question->qoqId, 'result' => 1];
             $question->result1 = ROQ::where($conditions)->count();
 
-            $conditions = ['qoqId' => $question->qoqId, 'result' => 2];
+            $conditions = ['qoq_id' => $question->qoqId, 'result' => 2];
             $question->result2 = ROQ::where($conditions)->count();
 
-            $conditions = ['qoqId' => $question->qoqId, 'result' => 3];
+            $conditions = ['qoq_id' => $question->qoqId, 'result' => 3];
             $question->result3 = ROQ::where($conditions)->count();
 
-            $conditions = ['qoqId' => $question->qoqId, 'result' => 4];
+            $conditions = ['qoq_id' => $question->qoqId, 'result' => 4];
             $question->result4 = ROQ::where($conditions)->count();
 
             $question->total = $question->result0 + $question->result1 + $question->result2 + $question->result3 + $question->result4;
@@ -155,19 +161,19 @@ class ReportController extends BaseController {
 
         foreach($questions as $question) {
 
-            $conditions = ['qoqId' => $question->qoqId, 'result' => 0];
+            $conditions = ['qoq_id' => $question->qoqId, 'result' => 0];
             $question->result0 = ROQ::where($conditions)->count();
 
-            $conditions = ['qoqId' => $question->qoqId, 'result' => 1];
+            $conditions = ['qoq_id' => $question->qoqId, 'result' => 1];
             $question->result1 = ROQ::where($conditions)->count();
 
-            $conditions = ['qoqId' => $question->qoqId, 'result' => 2];
+            $conditions = ['qoq_id' => $question->qoqId, 'result' => 2];
             $question->result2 = ROQ::where($conditions)->count();
 
-            $conditions = ['qoqId' => $question->qoqId, 'result' => 3];
+            $conditions = ['qoq_id' => $question->qoqId, 'result' => 3];
             $question->result3 = ROQ::where($conditions)->count();
 
-            $conditions = ['qoqId' => $question->qoqId, 'result' => 4];
+            $conditions = ['qoq_id' => $question->qoqId, 'result' => 4];
             $question->result4 = ROQ::where($conditions)->count();
 
             $question->total = $question->result0 + $question->result1 + $question->result2 + $question->result3 + $question->result4;
@@ -733,7 +739,7 @@ class ReportController extends BaseController {
         if(count($qInfos) == 0)
             return Redirect::to(route('reports', ['quiz_id' => $quizId]));
 
-        $total = ROQ::where('qoqId', '=', $qInfos[0]->qoqId)->count();
+        $total = ROQ::whereQOQId($qInfos[0]->qoqId)->count();
 
         foreach ($qInfos as $qInfo) {
             $condition = ['qoqId' => $qInfo->qoqId,
@@ -773,7 +779,7 @@ class ReportController extends BaseController {
         if(count($qInfos) == 0)
             return Redirect::to(route('reports', ['quiz_id' => $quizId]));
 
-        $total = ROQ::where('qoqId', '=', $qInfos[0]->qoqId)->count();
+        $total = ROQ::whereQOQId($qInfos[0]->qoqId)->count();
 
         foreach ($qInfos as $qInfo) {
             $condition = ['qoqId' => $qInfo->qoqId,

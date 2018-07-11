@@ -4,7 +4,7 @@ function changeDegree(newDegree, lessonId, subjectIds) {
         type: 'post',
         url: 'getLessonsByChangingDegree',
         data: {
-            degreeId : newDegree
+            degree_id : newDegree
         },
         success: function (response) {
             document.getElementById(lessonId).innerHTML = response;
@@ -20,7 +20,7 @@ function changeDegreeWithSelectedLesson(newDegree, lessonId, subjectIds, compass
         type: 'post',
         url: 'getLessonsByChangingDegreeWithSelectedLesson',
         data: {
-            degreeId : newDegree,
+            degree_id : newDegree,
             selectedLesson : selectedLesson
         },
         success: function (response) {
