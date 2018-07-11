@@ -1,0 +1,1 @@
+<?phpclass Subject extends Eloquent {        protected $table = 'subjects';    public $timestamps = false;    public function lesson() {        return $this->belongsTo('Lesson', 'id_l', 'id');    }    public function questions() {        return $this->hasMany('Question', 'subject_id', 'id');    }}
