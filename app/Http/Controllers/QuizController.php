@@ -295,8 +295,8 @@ class QuizController extends Controller {
         $boxesOfQuiz = Quiz::whereId($quizId)->boxes()->select('box.id', 'box.name')->get();
         $allBoxes = Box::select('box.id', 'box.name')->get();
 
-        return view('addQuestionToQuiz', array('boxesOfQuiz' => $boxesOfQuiz, 'quiz_id' => $quizId, 'qoq' => $qoq, 'box_id' => $boxId,
-            'boxes' => $allBoxes, 'items' => $items, 'questions' => $questions, 'msg' => $msg));
+        return view('addQuestionToQuiz', array('boxesOfQuiz' => $boxesOfQuiz, 'quizId' => $quizId, 'qoq' => $qoq,
+            'boxId' => $boxId, 'boxes' => $allBoxes, 'items' => $items, 'questions' => $questions, 'msg' => $msg));
     }
 
     public function addDegreeToQuiz($quizId) {
@@ -344,7 +344,7 @@ class QuizController extends Controller {
                 'minusMark' => $quiz->minusMark,
                 'kindQ' => $quiz->kindQ,
                 'error' => '',
-                'quiz_id' => $quizId,
+                'quizId' => $quizId,
                 'url' => $url,
                 'mode' => 'edit'));
         }
@@ -448,7 +448,7 @@ class QuizController extends Controller {
             }
         }
 
-        return view('editQuiz', array('quiz_id' => $quizId, 'msg' => $msg));
+        return view('editQuiz', array('quizId' => $quizId, 'msg' => $msg));
     }
 
     public function createQuiz() {

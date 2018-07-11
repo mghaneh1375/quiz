@@ -21,5 +21,9 @@ class Enheraf extends Model {
 
     protected $table = 'enheraf';
     public $timestamps = false;
+
+    public static function whereId($target) {
+        return Enheraf::find($target);
+    }
     
 }

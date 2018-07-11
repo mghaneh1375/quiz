@@ -224,9 +224,9 @@ function getTotalQ(subject_id, compassId, level) {
         type: 'post',
         url : 'getTotalQ',
         data: {
-            subject_id: subject_id,
-            compassId: compassId,
-            level: level
+            'subject_id': subject_id,
+            'compass_id': compassId,
+            'level': level
         },
         success: function (response) {
             alert(response);

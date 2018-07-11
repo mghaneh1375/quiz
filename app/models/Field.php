@@ -21,7 +21,7 @@ class Field extends Model {
     public $timestamps = false;
 
     public static function whereId($target) {
-        return Field::whereId($target);
+        return Field::find($target);
     }
 
 }
