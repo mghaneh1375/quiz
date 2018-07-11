@@ -1,8 +1,1 @@
-<?php
-
-class qEntry extends Eloquent {
-
-    protected $table = "qEntry";
-    public $timestamps = false;
-
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;/** * An Eloquent Model: 'qEntry' * * @property integer $id * @property integer $q_id * @property integer $u_id * @property boolean $status * @property string $timeEntry * @property string $dateEntry * @method static \Illuminate\Database\Query\Builder|\App\models\qEntry whereUId($value) * @method static \Illuminate\Database\Query\Builder|\App\models\qEntry whereQId($value) */class qEntry extends Model {    protected $table = "qentry";    public $timestamps = false;    public static function whereId($target) {        return qEntry::find($target);    }}

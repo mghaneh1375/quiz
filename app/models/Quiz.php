@@ -1,15 +1,1 @@
-<?php
-
-class Quiz extends Eloquent {
-
-    protected $table = "quiz";
-    public $timestamps = false;
-
-    public function degree() {
-        return $this->belongsToMany('Degree', 'degreeOfQuiz', 'quizId', 'degreeId');
-    }
-
-    public function boxes() {
-        return $this->belongsToMany('Box', 'boxesOfQuiz', 'quizId', 'boxId');
-    }
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;/** * An Eloquent Model: 'Quiz' * * @property integer $id * @property string $QN * @property string $sDate * @property string $eDate * @property string $sTime * @property string $eTime * @property string $guide * @property integer $tL * @property integer $mark * @property boolean $minusMark * @property integer $author * @property integer $kindQ */class Quiz extends Model {    protected $table = "quiz";    public $timestamps = false;    public function degree() {        return $this->belongsToMany('Degree', 'degreeOfQuiz', 'quizId', 'degreeId');    }    public function boxes() {        return $this->belongsToMany('Box', 'boxesOfQuiz', 'quizId', 'boxId');    }    public static function whereId($target) {        return Quiz::find($target);    }}

@@ -16,7 +16,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::post('getQuizLessons', array('as' => 'getQuizLessons', 'uses' => 'ajaxController@getQuizLessons'));
+Route::post('getQuizLessons', array('as' => 'getQuizLessons', 'uses' => 'AjaxController@getQuizLessons'));
 
 Route::group(array('before' => 'auth|levelController:1'), function () {
 
@@ -32,23 +32,23 @@ Route::group(array('before' => 'auth|levelController:1'), function () {
 
 Route::group(array('before' => 'auth|levelController:1'), function () {
 
-    Route::post('getLessonsByChangingDegree', 'ajaxController@getLessons');
+    Route::post('getLessonsByChangingDegree', 'AjaxController@getLessons');
 
-    Route::post('getLessonsByChangingDegreeWithSelectedLesson', 'ajaxController@getLessonsWithSelected');
+    Route::post('getLessonsByChangingDegreeWithSelectedLesson', 'AjaxController@getLessonsWithSelected');
 
-    Route::post('getSubjectsByChangingLesson', 'ajaxController@getSubjects');
+    Route::post('getSubjectsByChangingLesson', 'AjaxController@getSubjects');
 
-    Route::post('addNewBox', 'ajaxController@addNewBox');
+    Route::post('addNewBox', 'AjaxController@addNewBox');
 
-    Route::post('updateBox', 'ajaxController@updateBox');
+    Route::post('updateBox', 'AjaxController@updateBox');
 
-    Route::post('changeQuiz', 'ajaxController@changeQuiz');
+    Route::post('changeQuiz', 'AjaxController@changeQuiz');
 
-    Route::post('getBoxItems', 'ajaxController@getBoxItems');
+    Route::post('getBoxItems', 'AjaxController@getBoxItems');
 
-    Route::post('getBoxItemsByNames', 'ajaxController@getBoxItemsByNames');
+    Route::post('getBoxItemsByNames', 'AjaxController@getBoxItemsByNames');
 
-    Route::post('deleteBox', 'ajaxController@deleteBox');
+    Route::post('deleteBox', 'AjaxController@deleteBox');
 
 });
 
@@ -88,23 +88,23 @@ Route::group(array('before' => 'auth'), function (){
 
     Route::any('doQuiz', 'QuizController@doQuiz');
 
-    Route::post('submitAns', 'ajaxController@submitAns');
+    Route::post('submitAns', 'AjaxController@submitAns');
 
-    Route::post('endQuiz', 'ajaxController@endQuiz');
+    Route::post('endQuiz', 'AjaxController@endQuiz');
 
-    Route::post('getCompasses', 'ajaxController@getCompasses');
+    Route::post('getCompasses', 'AjaxController@getCompasses');
 
-    Route::post('getTotalQ', 'ajaxController@getTotalQ');
+    Route::post('getTotalQ', 'AjaxController@getTotalQ');
 
-    Route::post('getEnherafMeyar', 'ajaxController@getEnherafMeyar');
+    Route::post('getEnherafMeyar', 'AjaxController@getEnherafMeyar');
 
-    Route::post('calcTaraz', 'ajaxController@calcTaraz');
+    Route::post('calcTaraz', 'AjaxController@calcTaraz');
 
-    Route::post('fillSubjectsPercentTable', 'ajaxController@fillSubjectsPercentTable');
+    Route::post('fillSubjectsPercentTable', 'AjaxController@fillSubjectsPercentTable');
 
-    Route::post('getQuizStates', array('as' => 'getQuizStates', 'uses' => 'ajaxController@getQuizStates'));
+    Route::post('getQuizStates', array('as' => 'getQuizStates', 'uses' => 'AjaxController@getQuizStates'));
 
-    Route::post('getQuizCities', array('as' => 'getQuizCities', 'uses' => 'ajaxController@getQuizCities'));
+    Route::post('getQuizCities', array('as' => 'getQuizCities', 'uses' => 'AjaxController@getQuizCities'));
 });
 
 Route::group(array('before' => 'auth'), function (){

@@ -1,6 +1,1 @@
-<?php
-
-class DegreeOfQuiz extends Eloquent {
-    protected $table = 'degreeOfQuiz';
-    public $timestamps = false;
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;/** * An Eloquent Model: 'BoxesOfQuiz' * * @property integer $id * @property integer $degree_id * @property integer $quiz_id * @method static \Illuminate\Database\Query\Builder|\App\models\DegreeOfQuiz whereDegreeId($value) * @method static \Illuminate\Database\Query\Builder|\App\models\DegreeOfQuiz whereQuizId($value) */class DegreeOfQuiz extends Model {    protected $table = 'degree_of_quiz';    public $timestamps = false;    public static function whereId($target) {        return DegreeOfQuiz::find($target);    }}

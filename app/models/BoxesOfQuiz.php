@@ -1,8 +1,1 @@
-<?php
-
-class BoxesOfQuiz extends Eloquent {
-
-    protected $table = 'boxesOfQuiz';
-    public $timestamps = false;
-    
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;/** * An Eloquent Model: 'BoxesOfQuiz' * * @property integer $id * @property integer $box_id * @property integer $quiz_id * @method static \Illuminate\Database\Query\Builder|\App\models\BoxesOfQuiz whereBoxId($value) * @method static \Illuminate\Database\Query\Builder|\App\models\BoxesOfQuiz whereQuizId($value) */class BoxesOfQuiz extends Model {    protected $table = 'boxes_of_quiz';    public $timestamps = false;    public static function whereId($target) {        return BoxesOfQuiz::find($target);    }}

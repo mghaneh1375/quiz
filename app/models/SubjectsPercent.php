@@ -1,7 +1,1 @@
-<?php
-
-class SubjectsPercent extends Eloquent {
-
-    protected $table = 'subjectsPercent';
-    public $timestamps = false;
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;use Illuminate\Support\Facades\DB;/** * An Eloquent Model: 'SubjectsPercent' * * @property integer $id * @property integer $q_id * @property integer $s_id * @property integer $u_id * @property float $percent * @method static \Illuminate\Database\Query\Builder|\App\models\SubjectsPercent whereQId($value) * @method static \Illuminate\Database\Query\Builder|\App\models\SubjectsPercent whereSId($value) * @method static \Illuminate\Database\Query\Builder|\App\models\SubjectsPercent whereUId($value) */class SubjectsPercent extends Model {    protected $table = 'subjects_percent';    public $timestamps = false;    public static function whereId($target) {        return SubjectsPercent::find($target);    }}

@@ -1,15 +1,1 @@
-<?php
-
-class QOQ extends Eloquent {
-
-    protected $table = 'qoq';
-    public $timestamps = false;
-
-    public function question() {
-        return $this->belongsTo('Question', 'questionId', 'id');
-    }
-
-    public function box() {
-        return $this->belongsTo('BoxesOfQuiz', 'boxesOfQuizId', 'id');
-    }
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;/** * An Eloquent Model: 'QOQ' * * @property integer $id * @property integer $question_id * @property integer $quiz_id * @property integer $qNo * @method static \Illuminate\Database\Query\Builder|\App\models\QOQ whereQuestionId($value) * @method static \Illuminate\Database\Query\Builder|\App\models\QOQ whereQuizId($value) */class QOQ extends Model {    protected $table = 'qoq';    public $timestamps = false;    public function question() {        return $this->belongsTo('Question', 'questionId', 'id');    }    public function box() {        return $this->belongsTo('BoxesOfQuiz', 'boxesOfQuizId', 'id');    }    public static function whereId($target) {        return QOQ::find($target);    }}

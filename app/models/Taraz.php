@@ -1,7 +1,1 @@
-<?php
-
-class Taraz extends Eloquent {
-
-    protected $table = 'taraz';
-    public $timestamps = false;
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;/** * An Eloquent Model: 'Taraz' * * @property integer $id * @property integer $taraz * @property integer $l_id * @property integer $q_entry_id * @property float $percent * @method static \Illuminate\Database\Query\Builder|\App\models\Taraz whereLId($value) * @method static \Illuminate\Database\Query\Builder|\App\models\Taraz whereQEntryId($value) */class Taraz extends Model {    protected $table = 'taraz';    public $timestamps = false;    public static function whereId($target) {        return Taraz::find($target);    }}

@@ -1,6 +1,1 @@
-<?php
-
-class Compass extends Eloquent {
-    protected $table = 'compass';
-    public $timestamps = false;
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;/** * An Eloquent Model: 'Compass' * * @property integer $id * @property string $name */class Compass extends Model {    protected $table = 'compass';    public $timestamps = false;    public static function whereId($target) {        return Compass::find($target);    }}

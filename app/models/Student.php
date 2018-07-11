@@ -1,7 +1,1 @@
-<?php
-
-class Student extends Eloquent {
-    
-    protected $table = 'students';
-    public $timestamps = false;
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;/** * An Eloquent Model: 'Student' * * @property integer $id * @property integer $degree * @method static \Illuminate\Database\Query\Builder|\App\models\Student whereDegree($value) */class Student extends Model {    protected $table = 'students';    public $timestamps = false;    public static function whereId($target) {        return Student::find($target);    }}

@@ -1,8 +1,1 @@
-<?php
-
-class State extends Eloquent {
-
-    protected $connection = 'mysql2';
-    protected $table = 'states';
-    public $timestamps = false;
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;/** * An Eloquent Model: 'State' * * @property integer $id * @property string $name */class State extends Model {    protected $connection = 'mysql2';    protected $table = 'states';    public $timestamps = false;    public static function whereId($target) {        return State::find($target);    }}

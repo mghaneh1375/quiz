@@ -1,8 +1,1 @@
-<?php
-
-class MCT extends Eloquent {
-
-    protected $table = 'mct';
-    public $timestamps = false;
-
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;use Illuminate\Support\Facades\DB;/** * An Eloquent Model: 'MCT' * * @property integer $id * @property string $ch1 * @property string $ch2 * @property string $ch3 * @property string $ch4 * @property integer $q_id * @property string $question * @method static \Illuminate\Database\Query\Builder|\App\models\MCT whereQId($value) */class MCT extends Model {    protected $table = 'mct';    public $timestamps = false;    public static function whereId($target) {        return MCT::find($target);    }}

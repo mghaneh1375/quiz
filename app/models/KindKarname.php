@@ -1,7 +1,1 @@
-<?php
-
-class KindKarname extends Eloquent {
-    protected $table = 'kindKarname';
-    public $primaryKey = 'quizId';
-    public $timestamps = false;
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;/** * An Eloquent Model: 'KindKarname' * * @property integer $quiz_id * @method static \Illuminate\Database\Query\Builder|\App\models\KindKarname whereQuizId($value) */class KindKarname extends Model {    protected $table = 'kind_karname';    public $primaryKey = 'quiz_id';    public $timestamps = false;    public static function whereId($target) {        return KindKarname::find($target);    }}

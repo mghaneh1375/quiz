@@ -1,7 +1,1 @@
-<?php
-
-class MSF extends Eloquent {
-
-    protected $table = 'msf';
-    public $timestamps = false;
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;use Illuminate\Support\Facades\DB;/** * An Eloquent Model: 'MSF' * * @property integer $id * @property integer $q_id * @property string $solution * @method static \Illuminate\Database\Query\Builder|\App\models\MSF whereQId($value) */class MSF extends Model {    protected $table = 'msf';    public $timestamps = false;    public static function whereId($target) {        return MSF::find($target);    }}

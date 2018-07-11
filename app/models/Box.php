@@ -1,12 +1,1 @@
-<?php
-
-class Box extends Eloquent {
-
-    protected $table = 'box';
-    public $timestamps = false;
-
-    public function items() {
-        return $this->hasMany('BoxItems', 'boxId', 'id');
-    }
-
-}
+<?phpnamespace App\models;use Illuminate\Database\Eloquent\Model;/** * An Eloquent Model: 'Box' * * @property integer $id * @property integer $from_ * @property integer $to_ * @property string $name */class Box extends Model {    protected $table = 'box';    public $timestamps = false;    public static function whereId($target) {        return Box::find($target);    }    public function items() {        return $this->hasMany('BoxItems', 'boxId', 'id');    }}
