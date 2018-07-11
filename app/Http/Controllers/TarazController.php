@@ -6,12 +6,12 @@ class TarazController extends BaseController {
 
         SubjectsPercent::where('qId', '=', $quizId)->delete();
 
-        $minusMark = Quiz::find($quizId)->minusMark;
+        $minusMark = Quiz::whereId($quizId)->minusMark;
 
-        $uIds = qentry::where('qId', '=', $quizId)->orderBy('uId', 'ASC')->select('uId')->get();
+        $uIds = QEntry::whereQId($quizId)->orderBy('uId', 'ASC')->select('uId')->get();
 
-        $sIds = DB::select('select DISTINCT questions.subject_id as sId FROM questions, qoq WHERE qoq.quizId = ' . $quizId . ' AND qoq.questionId = questions.id');
-        $cIds = DB::select('select DISTINCT questions.compassId as cId FROM questions, qoq WHERE qoq.quizId = ' . $quizId . ' AND qoq.questionId = questions.id');
+        $sIds = DB::select('select DISTINCT questions.subject_id as sId FROM questions, qoq WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
+        $cIds = DB::select('select DISTINCT questions.compass_id as cId FROM questions, qoq WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
 
         $inCorrectsInSubjects = $correctsInSubjects = $inCorrectsInCompasses = $correctsInCompasses = array();
         $counter = 0;
@@ -28,7 +28,7 @@ class TarazController extends BaseController {
             $counter++;
         }
 
-        $qoqs = DB::select('select qoq.id as qoqId, questions.ans as ans, questions.subject_id as sId, questions.compassId as cId from qoq, questions WHERE qoq.quizId = ' . $quizId . ' AND qoq.questionId = questions.id');
+        $qoqs = DB::select('select qoq.id as qoqId, questions.ans as ans, questions.subject_id as sId, questions.compass_id as cId from qoq, questions WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
         $totals = array();
 
         foreach ($sIds as $sId)
@@ -115,7 +115,7 @@ class TarazController extends BaseController {
 
     public function getEnherafMeyar($lId, $lessonAvg, $quizId) {
 
-        $percents = DB::select('select percent from taraz, qEntry qe WHERE taraz.lId = ' . $lId .' and taraz.qEntryId = qe.id AND qe.qId = '. $quizId);
+        $percents = DB::select('select percent from taraz, qEntry qe WHERE taraz.lId = ' . $lId .' and taraz.q_entry_id = qe.id AND qe.qId = '. $quizId);
         $sum = 0.0;
         for($i = 0; $i < count($percents); $i++)
             $sum += pow($percents[$i]->percent - $lessonAvg, 2);
@@ -134,13 +134,13 @@ class TarazController extends BaseController {
 
         $msg = "";
 
-        if(isset($_POST["createTaraz"]) && isset($_POST["quizId"])) {
+        if(isset($_POST["createTaraz"]) && isset($_POST["quiz_id"])) {
 
-            $quizId = makeValidInput($_POST["quizId"]);
+            $quizId = makeValidInput($_POST["quiz_id"]);
 			
             try {
 
-                $notFounded = DB::select('SELECT DISTINCT(roq.uId) FROM `roq`, qoq WHERE uId not in (SELECT uId from qentry WHERE qId = ' . $quizId . ') and qoqId = qoq.id and qoq.quizId = ' . $quizId);
+                $notFounded = DB::select('SELECT DISTINCT(roq.uId) FROM `roq`, qoq WHERE uId not in (SELECT uId from qentry WHERE qId = ' . $quizId . ') and qoqId = qoq.id and qoq.quiz_id = ' . $quizId);
 
 
                 include_once 'Date.php';
@@ -177,7 +177,7 @@ class TarazController extends BaseController {
                     $msg = "مشکلی در ایجاد جدول تراز آزمون ایجاد شده است";
                 }
 
-                $qoqs = QOQ::where('quizId', '=', $quizId)->get();
+                $qoqs = QOQ::whereQuizId($quizId)->get();
 
                 $tmp = array();
                 for ($i = 0; $i < count($qEntryIds); $i++) {
@@ -194,7 +194,7 @@ class TarazController extends BaseController {
                     $tmp[$i] = $qEntryIds[$i]->id;
                 }
 
-                return View::make('createTaraz', array('quizId' => $quizId, 'qEntryIds' => $tmp));
+                return view('createTaraz', array('quiz_id' => $quizId, 'qEntryIds' => $tmp));
 
             }
             catch (Exception $e){
@@ -206,7 +206,7 @@ class TarazController extends BaseController {
         }
 
         $quizes = Quiz::select('id', 'QN')->get();
-        return View::make('createTarazTable', array('msg' => $msg, 'mode' => 'create', 'quizes' => $quizes));
+        return view('createTarazTable', array('msg' => $msg, 'mode' => 'create', 'quizes' => $quizes));
     }
 
     public function deleteTarazTable() {
@@ -214,11 +214,11 @@ class TarazController extends BaseController {
         $msg = "";
 
         if(isset($_POST["createTaraz"])) {
-            $quizId = makeValidInput($_POST["quizId"]);
+            $quizId = makeValidInput($_POST["quiz_id"]);
 
             DB::select('delete from taraz where qEntryId IN (SELECT id from qEntry where qId = ' . $quizId . ')');
             SubjectsPercent::where('qId', '=', $quizId)->delete();
-            Enheraf::where('qId', '=', $quizId)->delete();
+            Enheraf::whereQId($quizId)->delete();
             CompassesPercent::where('qId', '=', $quizId)->delete();
             
             $msg = "جدول تراز آزمون مورد نظر با موفقیت حذف گردید";
@@ -226,7 +226,7 @@ class TarazController extends BaseController {
         }
 
         $quizes = Quiz::select('id', 'QN')->get();
-        return View::make('createTarazTable', array('msg' => $msg, 'mode' => 'delete', 'quizes' => $quizes));
+        return view('createTarazTable', array('msg' => $msg, 'mode' => 'delete', 'quizes' => $quizes));
     }
 
     private function checkDataQ($qId) {
@@ -234,7 +234,7 @@ class TarazController extends BaseController {
         include_once 'Date.php';
 
         $date = getToday();
-        $quiz = Quiz::find($qId);
+        $quiz = Quiz::whereId($qId);
 
         if($date["date"] < $quiz->eDate || $date["date"] == $quiz->eDate && $date["time"] < $quiz->eTime)
             throw new Exception('quiz_end_time_error');
@@ -246,9 +246,9 @@ class TarazController extends BaseController {
 
     private function getAverageLesson($lId, $qId, $qEntryIds) {
 
-        $minusMark = Quiz::find($qId)->minusMark;
+        $minusMark = Quiz::whereId($qId)->minusMark;
 
-        $questionIds = DB::select('SELECT qoq.id, qoq.questionId, questions.ans FROM qoq, questions WHERE qoq.quizId = ' . $qId . ' and questions.id = qoq.questionId and (SELECT subjects.id_l FROM subjects WHERE subjects.id = questions.subject_id) = ' . $lId);
+        $questionIds = DB::select('SELECT qoq.id, qoq.question_id, questions.ans FROM qoq, questions WHERE qoq.quiz_id = ' . $qId . ' and questions.id = qoq.question_id and (SELECT subjects.id_l FROM subjects WHERE subjects.id = questions.subject_id) = ' . $lId);
         $corrects = $inCorrects = $total = 0;
         for($i = 0; $i < count($qEntryIds); $i++) {
             $tmpTotal = $tmpCorrects = $tmpInCorrects = 0;

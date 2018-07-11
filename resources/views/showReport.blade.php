@@ -9,7 +9,7 @@
     <script>
 
         function getReport() {
-            document.location.href = '{{route('home')}}' + '/reports/' + $("#quizId").val();
+            document.location.href = '{{route('home')}}' + '/reports/' + $("#quiz_id").val();
         }
     </script>
 @stop
@@ -29,7 +29,7 @@
                         @if(count($quizes) == 0)
                             <p class="warning_color" style="margin-top: 10px">آزمونی جهت نمایش وجود ندارد</p>
                         @else
-                            <select id="quizId">
+                            <select id="quiz_id">
                                 @foreach($quizes as $quiz)
                                     <option value="{{$quiz->id}}">{{$quiz->QN}}</option>
                                 @endforeach

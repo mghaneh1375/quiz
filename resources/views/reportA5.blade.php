@@ -32,11 +32,11 @@
 @section('reminder')
 
     <center style="margin-top: 10px">
-        <a href="{{route('reports', ['quizId' => $quizId])}}"><button class="btn btn-primary">بازگشت به مرحله ی قبل</button></a>
+        <a href="{{route('reports', ['quiz_id' => $quizId])}}"><button class="btn btn-primary">بازگشت به مرحله ی قبل</button></a>
         <div class="line"></div>
 
         <div class="col-xs-12" style="margin-top: 10px">
-            <button class="btn btn-success" onclick="document.location.href = '{{route('A5Excel', ['quizId' => $quizId])}}'">دریافت فایل اکسل</button>
+            <button class="btn btn-success" onclick="document.location.href = '{{route('A5Excel', ['quiz_id' => $quizId])}}'">دریافت فایل اکسل</button>
         </div>
 
         @if(isset($msg) && !empty($msg))
@@ -70,7 +70,7 @@
 
                 @foreach($users as $user)
                     <?php $sumTaraz = 0; $sumLesson = 0; $sumCoherence = 0; ?>
-                    <tr style="cursor: pointer" onclick="document.location.href = '{{route('A3', ['quizId' => $quizId, 'uId' => $user->uId, 'backURL' => 'A5'])}}'">
+                    <tr style="cursor: pointer" onclick="document.location.href = '{{route('A3', ['quiz_id' => $quizId, 'uId' => $user->uId, 'backURL' => 'A5'])}}'">
                         <td><center>{{$user->name}}</center></td>
                         <td><center>{{$user->city}}</center></td>
                         <td><center>{{$user->state}}</center></td>

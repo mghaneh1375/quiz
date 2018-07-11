@@ -1,5 +1,22 @@
 <?php
 
+use App\models\Box;
+use App\models\BoxItems;
+use App\models\Compass;
+use App\models\Degree;
+use App\models\Enheraf;
+use App\models\Lesson;
+use App\models\QEntry;
+use App\models\QOQ;
+use App\models\Question;
+use App\models\Quiz;
+use App\models\ROQ;
+use App\models\Subject;
+use App\models\Taraz;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
+
 include_once 'Common.php';
 
 class AjaxController extends BaseController {
@@ -7,7 +24,7 @@ class AjaxController extends BaseController {
     public function getLessons() {
 
         $degreeId = makeValidInput($_POST["degreeId"]);
-        $lessons = Degree::find($degreeId)->lessons()->get();
+        $lessons = Degree::whereId($degreeId)->lessons()->get();
         foreach ($lessons as $lesson)
             echo "<option value='".$lesson->id."'>".$lesson->nameL."</option>";
     }
@@ -16,7 +33,7 @@ class AjaxController extends BaseController {
 
         $degreeId = makeValidInput($_POST["degreeId"]);
         $selectedLesson = makeValidInput($_POST["selectedLesson"]);
-        $lessons = Degree::find($degreeId)->lessons()->get();
+        $lessons = Degree::whereId($degreeId)->lessons()->get();
         foreach ($lessons as $lesson) {
             if($lesson->id == $selectedLesson)
                 echo "<option selected value='" . $lesson->id . "'>" . $lesson->nameL . "</option>";
@@ -28,7 +45,7 @@ class AjaxController extends BaseController {
     public function getSubjects() {
 
         $lessonId = makeValidInput($_POST["lessonId"]);
-        $subjects = Lesson::find($lessonId)->subjects()->get();
+        $subjects = Lesson::whereId($lessonId)->subjects()->get();
         foreach ($subjects as $subject)
             echo "<option value='".$subject->id."'>".$subject->nameSubject."</option>";
     }
@@ -42,7 +59,7 @@ class AjaxController extends BaseController {
         $compassIds = $_POST["compassIds"];
         $boxName = makeValidInput($_POST["boxName"]);
 
-        $box = Box::where('name', '=', $boxName)->count();
+        $box = Box::whereName($boxName)->count();
         if($box > 0) {
             echo -1;
             return;
@@ -56,10 +73,10 @@ class AjaxController extends BaseController {
 
         for($i = 0; $i < count($subjectIds); $i++) {
             $item = new BoxItems();
-            $item->boxId = $box->id;
+            $item->box_id = $box->id;
             $item->subject_id = makeValidInput($subjectIds[$i]);
             $item->grade = makeValidInput($grades[$i]);
-            $item->compassId = makeValidInput($compassIds[$i]);
+            $item->compass_id = makeValidInput($compassIds[$i]);
             $item->save();
         }
         echo 1;
@@ -73,12 +90,12 @@ class AjaxController extends BaseController {
         $grades = $_POST["grades"];
         $compassIds = $_POST["compassIds"];
         $boxName = makeValidInput($_POST["boxName"]);
-        $boxId = makeValidInput($_POST["boxId"]);
+        $boxId = makeValidInput($_POST["box_id"]);
 
-        $box = Box::find($boxId);
+        $box = Box::whereId($boxId);
 
         if($box->name != $boxName) {
-            $boxTmp = Box::where('name', '=', $boxName)->count();
+            $boxTmp = Box::whereName($boxName)->count();
             if ($boxTmp > 0) {
                 echo -1;
                 return;
@@ -90,7 +107,7 @@ class AjaxController extends BaseController {
         $box->name = $boxName;
         $box->save();
 
-        $boxItems = BoxItems::where('boxId', '=', $boxId)->get();
+        $boxItems = BoxItems::whereBoxId($boxId)->get();
 
         $i = 0;
         $size = (int)$to - $from + 1;
@@ -103,7 +120,7 @@ class AjaxController extends BaseController {
             else {
                 $item->subject_id = makeValidInput($subjectIds[$i]);
                 $item->grade = makeValidInput($grades[$i]);
-                $item->compassId = makeValidInput($compassIds[$i++]);
+                $item->compass_id = makeValidInput($compassIds[$i++]);
                 $item->save();
             }
         }
@@ -112,17 +129,17 @@ class AjaxController extends BaseController {
     }
 
     public function deleteBox(){
-        $boxId = makeValidInput($_POST["boxId"]);
+        $boxId = makeValidInput($_POST["box_id"]);
         Box::destroy($boxId);
     }
 
     public function getBoxItemsByNames() {
-        $boxId = makeValidInput($_POST["boxId"]);
-        $boxItems = BoxItems::where('boxId', '=', $boxId)->get();
+        $boxId = makeValidInput($_POST["box_id"]);
+        $boxItems = BoxItems::whereBoxId($boxId)->get();
         $out = array();
         $counter = 0;
         foreach ($boxItems as $boxItem) {
-            $subject = Subject::where('id', '=', $boxItem->subject_id)->select('subjects.nameSubject')->get();
+            $subject = Subject::whereId($boxItem->subject_id)->select('subjects.nameSubject')->get();
             if (count($subject) > 0)
                 $boxItem->subject_id = $subject[0]->nameSubject;
             if ($boxItem->grade == 1)
@@ -132,7 +149,7 @@ class AjaxController extends BaseController {
             else
                 $boxItem->grade = 'دشوار';
 
-            $boxItem->compassId = Compass::find($boxItem->compassId)->name;
+            $boxItem->compass_id = Compass::whereId($boxItem->compass_id)->name;
 
             $out[$counter++] = $boxItem;
         }
@@ -141,8 +158,8 @@ class AjaxController extends BaseController {
 
     public function getBoxItems() {
 
-        $boxId = makeValidInput($_POST["boxId"]);
-        $boxItems = BoxItems::where('boxId', '=', $boxId)->get();
+        $boxId = makeValidInput($_POST["box_id"]);
+        $boxItems = BoxItems::whereBoxId($boxId)->get();
         $out = array();
         $counter = 0;
 
@@ -155,10 +172,10 @@ class AjaxController extends BaseController {
 
     public function changeQuiz() {
         $qId = makeValidInput($_POST["qId"]);
-        $quiz = Quiz::find($qId);
+        $quiz = Quiz::whereId($qId);
         $out = array();
         $out[0] = $quiz;
-        $count = QOQ::where('quizId', '=', $qId)->count();
+        $count = QOQ::whereQuizId($qId)->count();
         $out[1] = $count;
         echo json_encode($out);
     }
@@ -172,7 +189,7 @@ class AjaxController extends BaseController {
 
         if($uId != -1) {
 
-            $condition = ['uId' => $uId, 'qoqId' => $qoqId];
+            $condition = ['u_id' => $uId, 'qoq_id' => $qoqId];
             $roq = ROQ::where($condition)->first();
 
 
@@ -185,12 +202,12 @@ class AjaxController extends BaseController {
 
     public function endQuiz() {
 
-        $quizId = makeValidInput($_POST["quizId"]);
+        $quizId = makeValidInput($_POST["quiz_id"]);
         $uId = makeValidInput(Session::get('uId', -1));
 
         if($uId != -1) {
-            $conditions = ['qId' => $quizId, 'uId' => $uId];
-            $qEntry = qEntry::where($conditions)->first();
+            $conditions = ['q_id' => $quizId, 'u_id' => $uId];
+            $qEntry = QEntry::where($conditions)->first();
             if($qEntry != null) {
                 $qEntry->status = 1;
                 $qEntry->save();
@@ -204,7 +221,7 @@ class AjaxController extends BaseController {
         if (isset($_POST["qEntryId"])) {
 
             $qEntryId = makeValidInput($_POST["qEntryId"]);
-            $quizId = qEntry::find($qEntryId);
+            $quizId = QEntry::whereId($qEntryId);
 
             if ($quizId == null) {
                 echo "nok";
@@ -212,7 +229,7 @@ class AjaxController extends BaseController {
             }
 
             $quizId = $quizId->qId;
-            $enherafMeyars = Enheraf::where('qId', '=', $quizId)->get();
+            $enherafMeyars = Enheraf::whereQId($quizId)->get();
             if ($enherafMeyars == null || count($enherafMeyars) == 0) {
                 echo "nok";
                 return;
@@ -222,7 +239,7 @@ class AjaxController extends BaseController {
                 $lId = $itr->lId;
                 $enherafMeyar = $itr->val;
                 $lessonAVG = $itr->lessonAVG;
-                $conditions = ["qEntryId" => $qEntryId, "lId" => $lId];
+                $conditions = ["q_entry_id" => $qEntryId, "l_id" => $lId];
                 $taraz = Taraz::where($conditions)->first();
 
                 if ($enherafMeyar == 0)
@@ -262,7 +279,7 @@ class AjaxController extends BaseController {
         if(isset($_POST["qId"])) {
 
             $quizId = makeValidInput($_POST["qId"]);
-            echo json_encode(DB::select('select DISTINCT(state.name) as stateName, state.id as stateId FROM azmoon.states as state, azmoon.cities as city, azmoon.students as std_, medal.qentry WHERE qentry.qId = ' . $quizId . ' and std_.id = qentry.uId and std_.city_id = city.id and city.state_id = state.id'));
+            echo json_encode(DB::select('select DISTINCT(state.name) as stateName, state.id as stateId FROM azmoon.states as state, azmoon.cities as city, azmoon.students as std_, medal.qentry WHERE qentry.q_id = ' . $quizId . ' and std_.id = qentry.u_id and std_.city_id = city.id and city.state_id = state.id'));
 
         }
     }
@@ -272,18 +289,18 @@ class AjaxController extends BaseController {
         if(isset($_POST["qId"])) {
 
             $quizId = makeValidInput($_POST["qId"]);
-            echo json_encode(DB::select('select DISTINCT(city.name) as cityName, city.id as cityId FROM azmoon.cities as city, azmoon.students as std_, medal.qentry WHERE qentry.qId = ' . $quizId . ' and std_.id = qentry.uId and std_.city_id = city.id'));
+            echo json_encode(DB::select('select DISTINCT(city.name) as cityName, city.id as cityId FROM azmoon.cities as city, azmoon.students as std_, medal.qentry WHERE qentry.q_id = ' . $quizId . ' and std_.id = qentry.u_id and std_.city_id = city.id'));
 
         }
     }
 
     public function getTotalQ() {
-
+        
         $subjectId = makeValidInput($_POST["subject_id"]);
-        $compassId = makeValidInput($_POST["compassId"]);
+        $compassId = makeValidInput($_POST["compass_id"]);
         $level = makeValidInput($_POST["level"]);
 
-        $condition = ['subject_id' => $subjectId, 'compassId' => $compassId, 'grade' => $level];
+        $condition = ['subject_id' => $subjectId, 'compass_id' => $compassId, 'grade' => $level];
 
         echo Question::where($condition)->count();
 

@@ -31,11 +31,11 @@
 
 @section('reminder')
     <center style="margin-top: 10px">
-        <a href="{{route('reports', ['quizId' => $quizId])}}"><button class="btn btn-primary">بازگشت به مرحله ی قبل</button></a>
+        <a href="{{route('reports', ['quiz_id' => $quizId])}}"><button class="btn btn-primary">بازگشت به مرحله ی قبل</button></a>
         <div class="line"></div>
 
         <div class="col-xs-12" style="margin-top: 10px">
-            <button class="btn btn-success" onclick="document.location.href = '{{route('A7Excel', ['quizId' => $quizId])}}'">دریافت فایل اکسل</button>
+            <button class="btn btn-success" onclick="document.location.href = '{{route('A7Excel', ['quiz_id' => $quizId])}}'">دریافت فایل اکسل</button>
         </div>
 
         <div class="col-xs-12" style="overflow-x: auto">

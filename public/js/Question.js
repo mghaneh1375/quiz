@@ -1,0 +1,1 @@
+function Question(subject_id, compass, level, questionId) {    this.subject_id = subject_id;    this.compass = compass;    this.level = level;    this.questionId = questionId;}

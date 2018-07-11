@@ -18,7 +18,7 @@
         @endif
 
         <div class="col-xs-12">
-            <button style="margin-top: 10px; min-width: 300px" class="btn btn-danger" onclick="document.location.href = '{{route('reports', ['quizId' => $quizId])}}'">بازگشت</button>
+            <button style="margin-top: 10px; min-width: 300px" class="btn btn-danger" onclick="document.location.href = '{{route('reports', ['quiz_id' => $quizId])}}'">بازگشت</button>
         </div>
 
         @if(count($uIds) == 0)
@@ -26,7 +26,7 @@
         @else
             @foreach($uIds as $uId)
                 <div class="col-xs-12">
-                    <button style="margin-top: 10px; min-width: 300px" class="btn btn-primary" onclick="document.location.href = '{{route('A3', ['quizId' => $quizId, 'uId' => $uId->id])}}'">{{$uId->firstName . " " . $uId->lastName}}</button>
+                    <button style="margin-top: 10px; min-width: 300px" class="btn btn-primary" onclick="document.location.href = '{{route('A3', ['quiz_id' => $quizId, 'uId' => $uId->id])}}'">{{$uId->firstName . " " . $uId->lastName}}</button>
                 </div>
             @endforeach
         @endif

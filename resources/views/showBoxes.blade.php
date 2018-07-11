@@ -77,7 +77,7 @@
             var from;
             var to;
             var selectedLesson = "{{$selectedLesson}}";
-            var boxId = "{{$box->id}}";
+            var box_id = "{{$box->id}}";
 
             $(document).ready(function () {
 
@@ -98,7 +98,7 @@
                 }
 
                 getCompasses(compassIds);
-                changeDegreeWithSelectedLesson($("#degreeId").find(":selected").val(), 'lessonId', subjectIds, compassIds, grades, selectedLesson, boxId);
+                changeDegreeWithSelectedLesson($("#degreeId").find(":selected").val(), 'lessonId', subjectIds, compassIds, grades, selectedLesson, box_id);
             });
 
             function submitNewBox() {
@@ -123,7 +123,7 @@
                     compassIds[i] = $('#compassId_' + (from + i) + ' :selected').val();
                 }
 
-                updateBox(from, to, subjectIds, grades, compassIds, boxName, boxId);
+                updateBox(from, to, subjectIds, grades, compassIds, boxName, box_id);
 
             }
 

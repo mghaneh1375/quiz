@@ -48,7 +48,7 @@
 
             if($("#kindKarname").find(":selected").val() == 2) {
                 $("#getKarnameBtn").attr('disabled', 'disabled');
-                getQuizLessons($("#quizId").find(":selected").val(), 'lessonContainer');
+                getQuizLessons($("#quiz_id").find(":selected").val(), 'lessonContainer');
             }
             else {
                 $("#divLessonContainer").css("visibility", "hidden");
@@ -75,7 +75,7 @@
                             @if(count($quizes) == 0)
                                 <p class="warning_color" style="margin-top: 10px">آزمونی جهت نمایش وجود ندارد</p>
                             @else
-                                <select id="quizId" name="quizId" onchange="changeKindKarname()">
+                                <select id="quiz_id" name="quiz_id" onchange="changeKindKarname()">
                                     @foreach($quizes as $quiz)
                                         @if(isset($selectedQuiz) && !empty($selectedQuiz) && $selectedQuiz == $quiz->id)
                                             <option selected value="{{$quiz->id}}">{{$quiz->QN}}</option>

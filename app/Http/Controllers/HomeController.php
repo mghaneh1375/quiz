@@ -1,9 +1,26 @@
 <?php
 
-class HomeController extends BaseController {
+namespace App\Http\Controllers;
+
+use App\models\City;
+use App\models\Etehadiye;
+use App\models\Field;
+use App\models\QEntry;
+use App\models\QOQ;
+use App\models\ROQ;
+use App\models\Student;
+use App\models\StudentPanel;
+use App\models\User;
+use App\models\UserPanel;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Redirect;
+
+class HomeController extends Controller {
 
     public function login() {
-        return View::make('login', array('msg' => ''));
+        return view('login', array('msg' => ''));
     }
 
     public function doLogin() {
@@ -11,20 +28,20 @@ class HomeController extends BaseController {
         $username = makeValidInput(Input::get('username'));
         $password = makeValidInput(Input::get('password'));
 
-        $tmp = User::where('username', '=', $username)->first();
+        $tmp = User::whereUsername($username)->first();
 
-        if($tmp != null && count($tmp) > 0 && $tmp->role == 0)
+        if($tmp != null > 0 && $tmp->role == 0)
             $tmp->delete();
 
-        if(User::where('username', '=', $username)->count() == 0) {
+        if(User::whereUsername($username)->count() == 0) {
 
-            $tmp = UserPanel::where('username', '=', $username)->first();
+            $tmp = UserPanel::whereUserPanel($username)->first();
 
             if ($tmp != null && count($tmp) > 0 && Hash::check($password, $tmp->password)) {
-                $stdTmp = StudentPanel::find($tmp->id);
+                $stdTmp = StudentPanel::whereId($tmp->id);
                 if ($stdTmp != null && Etehadiye::where('NationalID', '=', $stdTmp->IDNumber)->count() > 0) {
 
-                    $field = Field::find($stdTmp->field_id);
+                    $field = Field::whereId($stdTmp->field_id);
 
                     if ($field != null) {
 
@@ -37,7 +54,7 @@ class HomeController extends BaseController {
                         $user->displayN = $stdTmp->first_name . $stdTmp->last_name;
                         $user->save();
 
-                        if(Student::find($stdTmp->id) == null) {
+                        if(Student::whereId($stdTmp->id) == null) {
                             switch ($field->id) {
                             case 32:
                                 $degree = 34;
@@ -69,14 +86,14 @@ class HomeController extends BaseController {
         }
         else {
             $msg = 'نام کاربری و یا پسورد اشتباه است';
-            return View::make('login', array('msg' => $msg));
+            return view('login', array('msg' => $msg));
         }
     }
 
     public function logout() {
 
         Auth::logout();
-        return Redirect::To("login");
+        return Redirect::to("login");
     }
 
 //    public function filterQuestions() {
@@ -98,7 +115,7 @@ class HomeController extends BaseController {
 //    }
 
     private function createTestForQuizes() {
-        $qoqIds = QOQ::where('quizId', '=', 12)->take(10)->get();
+        $qoqIds = QOQ::whereQuizId(12)->take(10)->get();
         $users = User::where('role', '=', 0)->select('id')->get();
         for($i = 0; $i < count($qoqIds); $i++) {
             for($j = 0; $j < count($users); $j++) {
@@ -112,16 +129,16 @@ class HomeController extends BaseController {
         }
 
         for($j = 0; $j < count($users); $j++) {
-            $qentry = new qentry();
-            $qentry->uId = $users[$j]->id;
-            $qentry->qId = 12;
+            $qentry = new QEntry();
+            $qentry->u_id = $users[$j]->id;
+            $qentry->q_id = 12;
             $qentry->status = 1;
             $qentry->save();
         }
     }
 
     private function fillStudentTable() {
-        $qEntries = qentry::where('qId', '=', 8)->get();
+        $qEntries = QEntry::whereQId(8)->get();
         $cities = City::all();
         for($i = 0; $i < count($qEntries); $i++) {
             $std = new StudentPanel();
@@ -134,6 +151,6 @@ class HomeController extends BaseController {
     
 	public function showHome() {
 //        $this->createTestForQuizes();
-        return View::make('home');
+        return view('home');
 	}
 }

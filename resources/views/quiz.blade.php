@@ -26,7 +26,7 @@
         var answer = {{json_encode($roqs)}};
         var qIdx = 0;
         var questionArr = {{json_encode($questions)}};
-        var quizId = "{{$quizId}}";
+        var quiz_id = "{{$quizId}}";
 
         $(document).ready(function () {
             SUQ();
@@ -77,7 +77,7 @@
                     type: 'post',
                     url: 'endQuiz',
                     data: {
-                        quizId: quizId
+                        quiz_id: quiz_id
                     },
                     success: function (response) {
                         document.getElementById("percent").innerHTML = "برای نمایش کارنامه می توانید بعد از اتمام زمان آزمون به قسمت مربوطه مراجعه فرمایید";
@@ -271,7 +271,7 @@
         <div class="col-xs-12">
             <center>
                 @if($mode == "special")
-                    <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="document.location.href = '{{route('addQuestionToQuiz', ['quizId' => $quizId])}}'">بازگشت به مرحله قبل</button>
+                    <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="document.location.href = '{{route('addQuestionToQuiz', ['quiz_id' => $quizId])}}'">بازگشت به مرحله قبل</button>
                 @else
                     <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="endQuiz()">اتمام ارزیابی</button>
                 @endif

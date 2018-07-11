@@ -18,7 +18,7 @@
         var getLessonsDir = '{{route('getQuizLessons')}}';
         var getStatesDir = '{{route('getQuizStates')}}';
         var getCitiesDir = '{{route('getQuizCities')}}';
-        var quizId = '{{$qId}}';
+        var quiz_id = '{{$qId}}';
 
         function showLessonPopUp(path) {
 
@@ -28,7 +28,7 @@
                 type: 'post',
                 url: getLessonsDir,
                 data: {
-                    'qId': quizId
+                    'qId': quiz_id
                 },
                 success: function (response) {
 
@@ -57,7 +57,7 @@
                 type: 'post',
                 url: getStatesDir,
                 data: {
-                    'qId': quizId
+                    'qId': quiz_id
                 },
                 success: function (response) {
 
@@ -86,7 +86,7 @@
                 type: 'post',
                 url: getCitiesDir,
                 data: {
-                    'qId': quizId
+                    'qId': quiz_id
                 },
                 success: function (response) {
 
@@ -109,15 +109,15 @@
 
         function showReport() {
             if($("#lessonId").val() != null) {
-                document.location.href = selectedPath + quizId + "/" + $("#lessonId").val();
+                document.location.href = selectedPath + quiz_id + "/" + $("#lessonId").val();
                 return;
             }
             if($("#stateId").val() != null) {
-                document.location.href = selectedPath + quizId + "/" + $("#stateId").val();
+                document.location.href = selectedPath + quiz_id + "/" + $("#stateId").val();
                 return;
             }
             if($("#cityId").val() != null) {
-                document.location.href = selectedPath + quizId + "/" + $("#cityId").val();
+                document.location.href = selectedPath + quiz_id + "/" + $("#cityId").val();
                 return;
             }
         }
@@ -171,25 +171,25 @@
             <a onclick="showCityPopUp('{{route('home')}}' + '/report3/')" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">درصد پاسخ به هر گزینه در هر سوال به تفکیک شهر</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A1', ['quizId' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">نمای کلی آزمون</button></a>
+            <a onclick="document.location.href = '{{route('A1', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">نمای کلی آزمون</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A2', ['quizId' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">وضعیت شهر های شرکت کننده</button></a>
+            <a onclick="document.location.href = '{{route('A2', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">وضعیت شهر های شرکت کننده</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('preA3', ['quizId' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">کارنامه تفصیلی دانش آموزان</button></a>
+            <a onclick="document.location.href = '{{route('preA3', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">کارنامه تفصیلی دانش آموزان</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A4', ['quizId' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">پراکندگی درصد شهرها</button></a>
+            <a onclick="document.location.href = '{{route('A4', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">پراکندگی درصد شهرها</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A5', ['quizId' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">کارنامه کلی دانش آموزان</button></a>
+            <a onclick="document.location.href = '{{route('A5', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">کارنامه کلی دانش آموزان</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A6', ['quizId' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">گزارش درس به درس</button></a>
+            <a onclick="document.location.href = '{{route('A6', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">گزارش درس به درس</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A7', ['quizId' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">پراکندگی نمرات هر درس</button></a>
+            <a onclick="document.location.href = '{{route('A7', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">پراکندگی نمرات هر درس</button></a>
         </div>
     </center>
 

@@ -7,7 +7,7 @@
 @section('extraLibraries')
     <script>
 
-        var quizId = "{{$quizId}}";
+        var quiz_id = "{{$quizId}}";
         var qEntryIds = {{ json_encode($qEntryIds)}};
         var percent = 0;
         var unit;
