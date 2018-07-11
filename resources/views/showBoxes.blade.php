@@ -53,6 +53,7 @@
                         </button>
 
                         <form style="float: right" method="post" action="{{URL('seeBoxes')}}">
+                            {{csrf_field()}}
                             <button style="margin-right: 5px" class="btn btn-info" name="editSelectedBox" value="{{$box->id}}" data-toggle="tooltip" title="ویرایش آیتم ها">
                                 <span style="margin-left: 10%" class="glyphicon glyphicon-edit"></span>
                             </button>

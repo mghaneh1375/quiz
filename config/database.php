@@ -50,8 +50,17 @@ return [
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
-            'strict' => true,
+            'strict' => false,
             'engine' => null,
+        ],
+        
+        'mysql2' => [
+            'driver'    => env('DB_CONNECTION_SECOND'),
+            'host'      => env('DB_HOST_SECOND'),
+            'port'      => env('DB_PORT_SECOND'),
+            'database'  => env('DB_DATABASE_SECOND'),
+            'username'  => env('DB_USERNAME_SECOND'),
+            'password'  => env('DB_PASSWORD_SECOND'),
         ],
 
         'pgsql' => [

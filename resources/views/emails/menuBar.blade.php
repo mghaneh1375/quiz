@@ -37,7 +37,7 @@
                 <a style="color: black" href="{{URL('defineKarname')}}"><button class='MyBtn'>تعریف کارنامه ی آزمون</button></a>
                 <a style="color: black" href="{{URL('createTarazTable')}}"><button class='MyBtn'>ساخت جدول ترازآزمون</button></a>
                 <a style="color: black" href="{{URL('deleteTarazTable')}}"><button class='MyBtn'>حذف جدول ترازآزمون</button></a>
-                <a style="color: black" href="{{URL('quizStatus')}}"><button class='MyBtn'>وضعیت های آزمون</button></a>
+                <a style="color: black" href="{{URL('QuizStatus')}}"><button class='MyBtn'>وضعیت های آزمون</button></a>
                 <a style="color: black" href="{{route('showReport')}}"><button class='MyBtn'>گزارشات</button></a>
             @else
                 <a style="color: black" href="{{URL('doQuiz')}}"><button type="submit" class="MyBtn">شرکت در آزمون</button></a>

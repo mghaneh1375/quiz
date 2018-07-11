@@ -69,6 +69,7 @@
         <div class="row data">
             <center>
                 <form method="post" action="{{URL('seeResult')}}">
+                    {{csrf_field()}}
                     <div class="col-xs-12">
                         <label>
                             <span>آزمون مورد نظر</span>

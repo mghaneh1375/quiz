@@ -65,7 +65,7 @@ Route::group(array('before' => 'auth|levelController:1'), function (){
 
     Route::any('createQuiz', 'QuizController@createQuiz');
 
-    Route::any('quizStatus', 'QuizController@quizStatus');
+    Route::any('QuizStatus', 'QuizController@QuizStatus');
 
     Route::any('addDegreeToQuiz={quiz_id}', 'QuizController@addDegreeToQuiz');
 

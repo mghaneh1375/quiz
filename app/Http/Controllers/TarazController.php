@@ -115,7 +115,7 @@ class TarazController extends BaseController {
 
     public function getEnherafMeyar($lId, $lessonAvg, $quizId) {
 
-        $percents = DB::select('select percent from taraz, qEntry qe WHERE taraz.lId = ' . $lId .' and taraz.q_entry_id = qe.id AND qe.qId = '. $quizId);
+        $percents = DB::select('select percent from taraz, qEntry qe WHERE taraz.l_id = ' . $lId .' and taraz.q_entry_id = qe.id AND qe.qId = '. $quizId);
         $sum = 0.0;
         for($i = 0; $i < count($percents); $i++)
             $sum += pow($percents[$i]->percent - $lessonAvg, 2);
@@ -140,7 +140,7 @@ class TarazController extends BaseController {
 			
             try {
 
-                $notFounded = DB::select('SELECT DISTINCT(roq.uId) FROM `roq`, qoq WHERE uId not in (SELECT uId from qentry WHERE qId = ' . $quizId . ') and qoqId = qoq.id and qoq.quiz_id = ' . $quizId);
+                $notFounded = DB::select('SELECT DISTINCT(roq.u_id) FROM `roq`, qoq WHERE uId not in (SELECT uId from qentry WHERE qId = ' . $quizId . ') and qoqId = qoq.id and qoq.quiz_id = ' . $quizId);
 
 
                 include_once 'Date.php';

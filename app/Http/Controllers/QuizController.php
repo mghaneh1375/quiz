@@ -61,7 +61,7 @@ class QuizController extends BaseController {
         return view('selectQuiz', array('msg' => $msg, 'quizIds' => $quizIds));
     }
 
-    public function quizStatus() {
+    public function QuizStatus() {
 
         $mode = 'show';
         $msg = "";
@@ -81,7 +81,7 @@ class QuizController extends BaseController {
 
             else {
 
-                $quizStatus = new quizStatus();
+                $quizStatus = new QuizStatus();
                 if($isPicSet == "0")
                     $quizStatus->status = makeValidInput($_POST["statusName"]);
                 else
@@ -111,14 +111,14 @@ class QuizController extends BaseController {
                                 $msg = $this->upload($targetFile, "pic", "ایجاد وضعیت جدید");
                                 if (empty($msg)) {
                                     $quizStatus->save();
-                                    return Redirect::to('quizStatus');
+                                    return Redirect::to('QuizStatus');
                                 }
                             }
                         }
                     }
                     else {
                         $quizStatus->save();
-                        return Redirect::to('quizStatus');
+                        return Redirect::to('QuizStatus');
                     }
                 }
             }
@@ -127,7 +127,7 @@ class QuizController extends BaseController {
         else if(isset($_POST["removeStatus"])) {
 
             $quizStatusId = makeValidInput($_POST["removeStatus"]);
-            $quizStatus = quizStatus::find($quizStatusId);
+            $quizStatus = QuizStatus::find($quizStatusId);
 
             if($quizStatus != null) {
 
@@ -140,8 +140,8 @@ class QuizController extends BaseController {
             }
         }
 
-        $quizStatus = quizStatus::all();
-        return view('quizStatus', array('quizStatus' => $quizStatus, 'mode' => $mode, 'msg' => $msg));
+        $quizStatus = QuizStatus::all();
+        return view('QuizStatus', array('QuizStatus' => $quizStatus, 'mode' => $mode, 'msg' => $msg));
     }
 
     public function addQuestionToQuiz($quizId) {
@@ -615,7 +615,7 @@ class QuizController extends BaseController {
                 $uId = Auth::user()->id;
 
                 $condition = ["qId" => $qId, "uId" => $uId];
-                $entry = qentry::where($condition)->select('status', 'timeEntry', 'dateEntry')->get();
+                $entry = QEntry::where($condition)->select('status', 'timeEntry', 'dateEntry')->get();
 
                 $mode = "normal";
                 $tL = Quiz::whereId($qId)->tL;
