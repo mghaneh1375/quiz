@@ -97,8 +97,7 @@ class AjaxController extends Controller {
         $box = Box::whereId($boxId);
 
         if($box->name != $boxName) {
-            $boxTmp = Box::whereName($boxName)->count();
-            if ($boxTmp > 0) {
+            if(Box::whereName($boxName)->count() > 0) {
                 echo -1;
                 return;
             }
@@ -109,22 +108,16 @@ class AjaxController extends Controller {
         $box->name = $boxName;
         $box->save();
 
-        $boxItems = BoxItems::whereBoxId($boxId)->get();
+        BoxItems::whereBoxId($boxId)->delete();
 
-        $i = 0;
-        $size = (int)$to - $from + 1;
+        for($i = 0; $i < count($subjectIds); $i++) {
 
-        foreach ($boxItems as $item) {
-
-            if($i >= $size)
-                $item->delete();
-
-            else {
-                $item->subject_id = makeValidInput($subjectIds[$i]);
-                $item->grade = makeValidInput($grades[$i]);
-                $item->compass_id = makeValidInput($compassIds[$i++]);
-                $item->save();
-            }
+            $item = new BoxItems();
+            $item->box_id = $box->id;
+            $item->subject_id = makeValidInput($subjectIds[$i]);
+            $item->grade = makeValidInput($grades[$i]);
+            $item->compass_id = makeValidInput($compassIds[$i]);
+            $item->save();
         }
 
         echo 1;
@@ -141,9 +134,9 @@ class AjaxController extends Controller {
         $out = array();
         $counter = 0;
         foreach ($boxItems as $boxItem) {
-            $subject = Subject::whereId($boxItem->subject_id)->select('subjects.nameSubject')->get();
-            if (count($subject) > 0)
-                $boxItem->subject_id = $subject[0]->nameSubject;
+            $subject = Subject::whereId($boxItem->subject_id);
+            if ($subject != null)
+                $boxItem->subject_id = $subject->nameSubject;
             if ($boxItem->grade == 1)
                 $boxItem->grade = 'آسان';
             else if ($boxItem->grade == 2)
@@ -281,7 +274,9 @@ class AjaxController extends Controller {
         if(isset($_POST["qId"])) {
 
             $quizId = makeValidInput($_POST["qId"]);
-            echo json_encode(DB::select('select DISTINCT(state.name) as stateName, state.id as stateId FROM azmoon.states as state, azmoon.cities as city, azmoon.students as std_, medal.qentry WHERE qentry.q_id = ' . $quizId . ' and std_.id = qentry.u_id and std_.city_id = city.id and city.state_id = state.id'));
+            echo json_encode(DB::select('select DISTINCT(state.name) as stateName, state.id as stateId FROM azmoon.states as state, azmoon.cities as city, 
+azmoon.students as std_, medal_db.qentry WHERE qentry.q_id = ' . $quizId . ' and std_.id = qentry.u_id and std_.city_id = 
+city.id and city.state_id = state.id'));
 
         }
     }
@@ -291,7 +286,8 @@ class AjaxController extends Controller {
         if(isset($_POST["qId"])) {
 
             $quizId = makeValidInput($_POST["qId"]);
-            echo json_encode(DB::select('select DISTINCT(city.name) as cityName, city.id as cityId FROM azmoon.cities as city, azmoon.students as std_, medal.qentry WHERE qentry.q_id = ' . $quizId . ' and std_.id = qentry.u_id and std_.city_id = city.id'));
+            echo json_encode(DB::select('select DISTINCT(city.name) as cityName, city.id as cityId FROM azmoon.cities as city, azmoon.students as std_, medal_db
+.qentry WHERE qentry.q_id = ' . $quizId . ' and std_.id = qentry.u_id and std_.city_id = city.id'));
 
         }
     }

@@ -53,7 +53,7 @@ class TarazController extends Controller {
 
 
         foreach ($qoqs as $qoq) {
-            $roqs = ROQ::whereQOQId($qoq->qoqId)->orderBy('u_id', 'ASC')->select('result', 'uId')->get();
+            $roqs = ROQ::whereQoqId($qoq->qoqId)->orderBy('u_id', 'ASC')->select('result', 'uId')->get();
 
             $totals[$qoq->sId]++;
             $totalsC[$qoq->cId]++;

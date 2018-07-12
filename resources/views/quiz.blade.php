@@ -4,15 +4,88 @@
     آزمون
 @stop
 
-<?php
-    $numQ = count($questions);
-    if ($questions == null || $numQ == 0) {
+@section('reminder')
+
+    <?php
+    if (!isset($questions) || $questions == null || count($questions) == 0) {
         echo "<div style='margin-top: 140px;'><center>سوالی در این آزمون وجود ندارد</center></div>";
         return;
     }
-?>
+    $numQ = count($questions);
+    ?>
 
-@section('extraLibraries')
+    <div id="popUpMenu2" style="margin-top: 300px;" hidden>
+        <center id="percent"></center>
+        <center style='margin-top: 20px;'><a href="{{URL('home')}}"><input type='submit' value='تایید'></a></center>
+    </div>
+
+    <div class="row" id="reminder" style="margin-top: 130px">
+
+        <div class="row" id="reminder">
+            <div class="col-xs-12">
+                <center style="margin-top: 20px">
+                    <div id="quiz_time" style='font-size: 14px;'></div>
+                </center>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <center style="margin-top: 20px;">
+                <table style="min-width: 100px;">
+                    <?php
+                    $counter = 0;
+                    for($i = 0; $i < $numQ; $i++) {
+                        if($counter == 0)
+                            echo "<tr>";
+                        $counter++;
+                        echo "<td id='td_$i' onclick='JMPTOQUIZ($i)' style='cursor: pointer; background-color: white; width: 30px; border: 2px solid black;'><center>".($i + 1)."</center></td>";
+                        if($counter == 15 || $i == $numQ - 1) {
+                            echo "</tr>";
+                            $counter = 0;
+                        }
+                    }
+                    ?>
+                </table>
+            </center>
+        </div>
+
+        <div class="col-xs-12" style="float: right; margin-top: 10px;">
+            <div class="col-xs-12 col-md-4" style='float: right; margin-top: 5px;'>
+                <div style="width: 30px; height: 30px; margin-right: 5px; background-color: yellow; border: 1px solid black; float: right;"></div>
+                <span style='margin-right: 5px;'>در حال پاسخ گویی</span>
+            </div>
+            <div class="col-xs-12 col-md-4" style='float: right; margin-top: 5px;'>
+                <div style="width: 30px; height: 30px; margin-right: 5px; background-color:gray; border: 1px solid black; float: right;"></div>
+                <span style='margin-right: 5px;'>پاسخ داده شده</span>
+            </div>
+            <div class="col-xs-12 col-md-4" style='float: right; margin-top: 5px;'>
+                <div style="width: 30px; height: 30px; margin-right: 5px; background-color: white; border: 1px solid black; float: right"></div>
+                <span style='margin-right: 5px;'>هنوز پاسخ داده نشده</span>
+            </div>
+        </div>
+
+        <div class='col-xs-12 well well-sm' style="margin-top: 10px; border: 3px solid black; background-color: #ffffff">
+            <div id="BQ" style='height: auto; width: auto; max-width: 100%'></div>
+        </div>
+        <div class="col-xs-12">
+            <div style='margin-top: 5px;'>
+                <center>
+                    <button id="nxtQ" class="MyBtn" style="width: auto; margin-right: 5px; border: solid 2px #a4712b;" onclick="incQ()">سوال بعدی</button>
+                    <button id="backQ" class="MyBtn" style="width: auto; margin-right: 5px; border: solid 2px #a4712b;" onclick="decQ()">سوال قبلی</button>
+                    <button id="returnToQuiz" class="MyBtn" style="width: auto; margin-right: 5px; border: solid 2px #a4712b;" onclick="SUQ()" hidden>بازگشت به سوالات</button>
+                </center>
+            </div>
+        </div>
+        <div class="col-xs-12">
+            <center>
+                @if($mode == "special")
+                    <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="document.location.href = '{{route('addQuestionToQuiz', ['quiz_id' => $quizId])}}'">بازگشت به مرحله قبل</button>
+                @else
+                    <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="endQuiz()">اتمام ارزیابی</button>
+                @endif
+            </center>
+        </div>
+    </div>
+
     <script>
 
         var mode = "{{$mode}}";
@@ -23,9 +96,9 @@
             var c_seconds = parseInt(total_time % 60);
         }
 
-        var answer = {{json_encode($roqs)}};
+        var answer = {!! json_encode($roqs) !!};
         var qIdx = 0;
-        var questionArr = {{json_encode($questions)}};
+        var questionArr = {!! json_encode($questions) !!};
         var quiz_id = "{{$quizId}}";
 
         $(document).ready(function () {
@@ -168,8 +241,7 @@
                 newNode = "<span><img alt='در حال بارگذاری تصویر' style='max-width: 100%' src='upload/" + questionArr[qIdx][3] + ".jpg'></span><br/>";
             else
                 newNode = (qIdx + 1) +  " - <span style='background-color: transparent;'>" + questionArr[qIdx][3] +  "</span><br/>";
-            $("#BQ").empty();
-            $("#BQ").append(newNode);
+            $("#BQ").empty().append(newNode);
             if(questionArr[qIdx][1] != 0 && questionArr[qIdx][2] == 0) {
                 for(i = 0; i < 4; i++) {
                     newNode = "<input type='radio' name='correctChoice' value='" + (i + 1) +  "' onclick='submitC(this.value)' style='margin-top: 10px;'"; if(answer[qIdx] == (i + 1)) newNode += "checked >  "; else newNode += ">  "; newNode += (i + 1) + ") " + questionArr[qIdx][4 + i] + "<br/>";
@@ -203,79 +275,4 @@
             }
         }
     </script>
-@stop
-
-@section('reminder')
-
-    <div id="popUpMenu2" style="margin-top: 300px;" hidden>
-        <center id="percent"></center>
-        <center style='margin-top: 20px;'><a href="{{URL('home')}}"><input type='submit' value='تایید'></a></center>
-    </div>
-
-    <div class="row" id="reminder" style="margin-top: 130px">
-
-        <div class="row" id="reminder">
-            <div class="col-xs-12">
-                <center style="margin-top: 20px">
-                    <div id="quiz_time" style='font-size: 14px;'></div>
-                </center>
-            </div>
-        </div>
-        <div class="col-xs-12">
-            <center style="margin-top: 20px;">
-                <table style="min-width: 100px;">
-                    <?php
-                    $counter = 0;
-                    for($i = 0; $i < $numQ; $i++) {
-                        if($counter == 0)
-                            echo "<tr>";
-                        $counter++;
-                        echo "<td id='td_$i' onclick='JMPTOQUIZ($i)' style='cursor: pointer; background-color: white; width: 30px; border: 2px solid black;'><center>".($i + 1)."</center></td>";
-                        if($counter == 15 || $i == $numQ - 1) {
-                            echo "</tr>";
-                            $counter = 0;
-                        }
-                    }
-                    ?>
-                </table>
-            </center>
-        </div>
-
-        <div class="col-xs-12" style="float: right; margin-top: 10px;">
-            <div class="col-xs-12 col-md-4" style='float: right; margin-top: 5px;'>
-                <div style="width: 30px; height: 30px; margin-right: 5px; background-color: yellow; border: 1px solid black; float: right;"></div>
-                <span style='margin-right: 5px;'>در حال پاسخ گویی</span>
-            </div>
-            <div class="col-xs-12 col-md-4" style='float: right; margin-top: 5px;'>
-                <div style="width: 30px; height: 30px; margin-right: 5px; background-color:gray; border: 1px solid black; float: right;"></div>
-                <span style='margin-right: 5px;'>پاسخ داده شده</span>
-            </div>
-            <div class="col-xs-12 col-md-4" style='float: right; margin-top: 5px;'>
-                <div style="width: 30px; height: 30px; margin-right: 5px; background-color: white; border: 1px solid black; float: right"></div>
-                <span style='margin-right: 5px;'>هنوز پاسخ داده نشده</span>
-            </div>
-        </div>
-
-        <div class='col-xs-12 well well-sm' style="margin-top: 10px; border: 3px solid black; background-color: #ffffff">
-            <div id="BQ" style='height: auto; width: auto; max-width: 100%'></div>
-        </div>
-        <div class="col-xs-12">
-            <div style='margin-top: 5px;'>
-                <center>
-                    <button id="nxtQ" class="MyBtn" style="width: auto; margin-right: 5px; border: solid 2px #a4712b;" onclick="incQ()">سوال بعدی</button>
-                    <button id="backQ" class="MyBtn" style="width: auto; margin-right: 5px; border: solid 2px #a4712b;" onclick="decQ()">سوال قبلی</button>
-                    <button id="returnToQuiz" class="MyBtn" style="width: auto; margin-right: 5px; border: solid 2px #a4712b;" onclick="SUQ()" hidden>بازگشت به سوالات</button>
-                </center>
-            </div>
-        </div>
-        <div class="col-xs-12">
-            <center>
-                @if($mode == "special")
-                    <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="document.location.href = '{{route('addQuestionToQuiz', ['quiz_id' => $quizId])}}'">بازگشت به مرحله قبل</button>
-                @else
-                    <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="endQuiz()">اتمام ارزیابی</button>
-                @endif
-            </center>
-        </div>
-    </div>
 @stop

@@ -148,7 +148,6 @@
 
             function showIndividualQuestions() {
 
-                $("#individualQuestions").empty();
                 newElement = "";
 
                 for(i = 0; i < numQuestions; i++) {
@@ -161,8 +160,7 @@
                     newElement += "</div>";
                 }
 
-                $("#individualQuestions").append(newElement);
-                $("#individualQuestions").show();
+                $("#individualQuestions").empty().append(newElement).show();
             }
         </script>
 

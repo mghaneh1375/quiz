@@ -70,14 +70,14 @@ function showBoxItems(boxId, itemId) {
         type: 'post',
         url: 'getBoxItemsByNames',
         data: {
-            boxId : boxId
+            "box_id" : boxId
         },
         success: function (response) {
             tmp = JSON.parse(response);
             newElement = "";
             for(i = 0; i < tmp.length; i++) {
                 newElement += "<div class='col-xs-12'><label><span style='margin-left: 5px; margin-right: 5px'> نام مبحث</span><input disabled type='text' value='" + tmp[i].subject_id + "'></label>";
-                newElement += "<label><span style='margin-left: 5px; margin-right: 5px'>نام حیطه </span><input disabled type='text' value='" + tmp[i].compassId + "'></label>";
+                newElement += "<label><span style='margin-left: 5px; margin-right: 5px'>نام حیطه </span><input disabled type='text' value='" + tmp[i].compass_id + "'></label>";
                 newElement += "<label><span style='margin-left: 5px; margin-right: 5px'>سطح سختی </span><input type='text' disabled value='" + tmp[i].grade + "'></label></div>";
             }
             document.getElementById(itemId).innerHTML = newElement;
@@ -90,7 +90,7 @@ function deleteSelectedBox(boxId) {
         type: 'post',
         url: 'deleteBox',
         data: {
-            boxId : boxId
+            "box_id" : boxId
         },
         success: function (response) {
             document.location.href = 'seeBoxes';
@@ -110,7 +110,7 @@ function updateBox(from, to, subjectIds, grades, compassIds, boxName, boxId) {
             grades : grades,
             compassIds : compassIds,
             boxName : boxName,
-            boxId : boxId
+            'box_id' : boxId
         },
         success: function (response) {
             if(response == -1) {
@@ -166,7 +166,7 @@ function getBoxItems(boxId, subjectIds, compassIds, gradeIds) {
             tmp = JSON.parse(response);
             for(i = 0; i < tmp.length; i++) {
                 document.getElementById(subjectIds[i]).value = tmp[i].subject_id;
-                document.getElementById(compassIds[i]).value = tmp[i].compassId;
+                document.getElementById(compassIds[i]).value = tmp[i].compass_id;
                 document.getElementById(gradeIds[i]).value = tmp[i].grade;
             }
         }

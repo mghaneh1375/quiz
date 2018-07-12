@@ -121,7 +121,7 @@ class QuizController extends Controller {
 
                     $file = $_FILES["pic"];
 
-                    $targetFile = "status/" . $file["name"];
+                    $targetFile = __DIR__ . "/../../../public/status/" . $file["name"];
 
                     if($isPicSet) {
                         if (!file_exists($targetFile)) {
@@ -150,8 +150,8 @@ class QuizController extends Controller {
 
             if($quizStatus != null) {
 
-                if(!empty($quizStatus->pic) && file_exists(__DIR__ . "/../../public/status/" . $quizStatus->status)) {
-                    $targetFile = __DIR__ . "/../../public/status/" . $quizStatus->status;
+                if(!empty($quizStatus->pic) && file_exists(__DIR__ . "/../../../public/status/" . $quizStatus->status)) {
+                    $targetFile = __DIR__ . "/../../../public/status/" . $quizStatus->status;
                     unlink($targetFile);
                 }
 
@@ -160,7 +160,7 @@ class QuizController extends Controller {
         }
 
         $quizStatus = QuizStatus::all();
-        return view('QuizStatus', array('QuizStatus' => $quizStatus, 'mode' => $mode, 'msg' => $msg));
+        return view('QuizStatus', array('quizStatus' => $quizStatus, 'mode' => $mode, 'msg' => $msg));
     }
 
     public function addQuestionToQuiz($quizId) {
@@ -177,9 +177,9 @@ class QuizController extends Controller {
             for($i = 0; $i < count($items); $i++) {
                 $conditions = ["compass_id" => $items[$i]->compass_id, 'grade' => $items[$i]->grade];
                 $questions[$i] = Subject::whereId($items[$i]->subject_id)->questions()->where($conditions)->select('questions.id', 'questions.organization_id')->get();
-                $subject = Subject::whereId($items[$i]->subject_id)->select('subjects.nameSubject')->get();
-                if(count($subject) > 0)
-                    $items[$i]->subject_id = $subject[0]->nameSubject;
+                $subject = Subject::whereId($items[$i]->subject_id);
+                if($subject != null)
+                    $items[$i]->subject_id = $subject->nameSubject;
                 if($items[$i]->grade == 1)
                     $items[$i]->grade = 'آسان';
                 else if($items[$i]->grade == 2)
@@ -212,8 +212,8 @@ class QuizController extends Controller {
             $conditions = ['box_id' => $boxId, 'quiz_id' => $quizId];
             BoxesOfQuiz::where($conditions)->delete();
             $box = Box::whereId($boxId);
-            if($box != null && count($box) > 0) {
-                DB::select('delete from qoq where quiz_id = ' . $quizId . ' and qNo >= ' . $box->from_
+            if($box != null) {
+                DB::delete('delete from qoq where quiz_id = ' . $quizId . ' and qNo >= ' . $box->from_
                     . ' and qNo <= ' . $box->to_);
             }
         }
@@ -256,7 +256,7 @@ class QuizController extends Controller {
                     for ($i = 0; $i < count($itemsTmp); $i++) {
                         $conditions = ['compass_id' => $itemsTmp[$i]->compass_id, 'grade' => $itemsTmp[$i]->grade];
                         $questionId = Subject::whereId($itemsTmp[$i]->subject_id)->questions()->where($conditions)->select('questions.id')->first();
-                        if ($questionId == null || count($questionId) == 0) {
+                        if ($questionId == null) {
                             $msg = "سوالی در جعبه ی مورد نظر قرار نمی گیرد";
                             break;
                         }
@@ -683,7 +683,7 @@ class QuizController extends Controller {
                 }
             }
 
-            return view('quiz', array('quiz_id' => $qId, 'roqs' => $roqs, 'questions' => $qInfo,
+            return view('quiz', array('quizId' => $qId, 'roqs' => $roqs, 'questions' => $qInfo,
                 'tL' => $tL * 60, 'mode' => $mode, 'startTime' => $startTime));
         }
 

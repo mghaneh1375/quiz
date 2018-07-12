@@ -16,11 +16,13 @@ use Illuminate\Support\Facades\Redirect;
 class KarnameController extends Controller {
 
     public function defineKarname() {
+
         if(isset($_POST["submitKindKarname"]) && isset($_POST["quiz_id"])) {
             $quizId = makeValidInput($_POST["quiz_id"]);
             $kindKarname = KindKarname::whereId($quizId);
-            return view('defineKarname', array('quiz_id' => $quizId, 'kindKarname' => $kindKarname));
+            return view('defineKarname', array('quizId' => $quizId, 'kindKarname' => $kindKarname));
         }
+
         if(isset($_POST["doDefine"])) {
             $quizId = makeValidInput($_POST["quiz_id"]);
             $kindKarname = KindKarname::whereId($quizId);
@@ -57,6 +59,7 @@ class KarnameController extends Controller {
             $kindKarname->save();
             return Redirect::to('home');
         }
+
         $quiz = Quiz::select('id', 'QN')->get();
         return view('defineKarname', array('quizes' => $quiz));
     }
