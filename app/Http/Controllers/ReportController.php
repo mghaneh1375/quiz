@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\models\KindKarname;
 use App\models\Lesson;
+use App\models\QEntry;
+use App\models\QOQ;
+use App\models\Question;
 use App\models\Quiz;
 use App\models\ROQ;
 use App\models\StudentPanel;
+use App\models\Taraz;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use PHPExcel;
 use PHPExcel_Writer_Excel2007;
-
-include_once __DIR__ . '/EXCEL/PHPExcel.php';
 
 class ReportController extends Controller {
 
@@ -97,7 +100,7 @@ class ReportController extends Controller {
             foreach ($percents as  $percent) {
 
                 $sum += $percent->percent;
-                $conditions = ['uId' => $percent->uId, 'qoqId' => $question->qoqId];
+                $conditions = ['u_id' => $percent->u_id, 'qoq_id' => $question->qoqId];
                 $tmp = ROQ::where($conditions)->first()->result;
                 if($tmp == $question->ans)
                     $col1[$i] = 1;
@@ -225,7 +228,7 @@ class ReportController extends Controller {
             foreach ($percents as  $percent) {
 
                 $sum += $percent->percent;
-                $conditions = ['uId' => $percent->uId, 'qoqId' => $question->qoqId];
+                $conditions = ['u_id' => $percent->u_id, 'qoq_id' => $question->qoqId];
                 $tmp = ROQ::where($conditions)->first()->result;
                 if($tmp == $question->ans)
                     $col1[$i] = 1;
@@ -295,7 +298,7 @@ class ReportController extends Controller {
 
     public function report1($qId, $stateId) { // استانی بر به تفکیک جنسیت
 
-        $qEntries = DB::select("select qentry.id, qentry.u_id FROM medal.qentry as qentry, azmoon.students as std_, azmoon.cities as city WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and city.id = std_.city_id and city.state_id = " . $stateId);
+        $qEntries = DB::select("select qentry.id, qentry.u_id FROM medal_db.qentry as qentry, azmoon.students as std_, azmoon.cities as city WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and city.id = std_.city_id and city.state_id = " . $stateId);
 
         $girls = $boys = 0;
 
@@ -308,7 +311,8 @@ class ReportController extends Controller {
 
         foreach ($qEntries as $qEntry) {
 
-            $sex = DB::select("select std_.school_sex_id as sex FROM azmoon.students as std_ WHERE std_.id = " . $qEntry->uId);
+            $sex = DB::select("select std_.school_sex_id as sex FROM azmoon.students as std_ WHERE std_.id = " .
+                $qEntry->u_id);
 
             if($sex[0]->sex == $this->girlSex)
                 $girls++;
@@ -317,7 +321,7 @@ class ReportController extends Controller {
 
             foreach ($lessons as $lesson) {
 
-                $condition = ['qEntryId' => $qEntry->id, 'lId' => $lesson->id];
+                $condition = ['q_entry_id' => $qEntry->id, 'l_id' => $lesson->id];
 
                 if($sex[0]->sex == $this->girlSex) {
                     $lesson->girlAvg += Taraz::where($condition)->first()->percent;
@@ -351,7 +355,7 @@ class ReportController extends Controller {
 
     public function report2($qId, $stateId) { // استانی بر به تفکیک جنسیت
 
-        $qEntries = DB::select("select qentry.id, qentry.u_id, std_.school_sex_id as sex FROM medal.qentry as qentry, azmoon.students as std_, azmoon.cities as city WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and city.id = std_.city_id and city.state_id = " . $stateId);
+        $qEntries = DB::select("select qentry.id, qentry.u_id, std_.school_sex_id as sex FROM medal_db.qentry as qentry, azmoon.students as std_, azmoon.cities as city WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and city.id = std_.city_id and city.state_id = " . $stateId);
 
         $girls = $boys = 0;
 
@@ -373,7 +377,7 @@ class ReportController extends Controller {
                 $girls++;
                 foreach ($lessons as $lesson) {
 
-                    $condition = ['qEntryId' => $qEntry->id, 'lId' => $lesson->id];
+                    $condition = ['q_entry_id' => $qEntry->id, 'l_id' => $lesson->id];
                     $percent = Taraz::where($condition)->first()->percent;
                     $idx = ($percent < 0) ? 0 : floor($percent / 25);
                     $lesson->girlArr[$idx] = $lesson->girlArr[$idx] + 1;
@@ -384,7 +388,7 @@ class ReportController extends Controller {
             }
             else {
                 foreach ($lessons as $lesson) {
-                    $condition = ['qEntryId' => $qEntry->id, 'lId' => $lesson->id];
+                    $condition = ['q_entry_id' => $qEntry->id, 'l_id' => $lesson->id];
                     $percent = Taraz::where($condition)->first()->percent;
                     $idx = ($percent < 0) ? 0 : floor($percent / 25);
                     $lesson->boyArr[$idx] = $lesson->boyArr[$idx] + 1;
@@ -408,17 +412,22 @@ class ReportController extends Controller {
 
     public function report3($qId, $cityId) {
 
-        $qEntries = DB::select("select qentry.id, qentry.u_id FROM medal.qentry as qentry, azmoon.students as std_ WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and std_.city_id = " . $cityId);
+        $qEntries = DB::select("select qentry.id, qentry.u_id FROM medal_db.qentry as qentry, azmoon.students as std_ WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and std_.city_id = " . $cityId);
 
         $qoq = QOQ::whereQuizId($qId)->orderBy('qNo', 'ASC')->get();
 
         foreach ($qoq as $itr) {
             $itr->ans = Question::whereId($itr->question_id)->ans;
-            $itr->ans0 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' and qoqId = ' . $itr->id . " and result = 0")[0]->countNum * 100 / count($qEntries));
-            $itr->ans1 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' and qoqId = ' . $itr->id . " and result = 1")[0]->countNum * 100 / count($qEntries));
-            $itr->ans2 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' and qoqId = ' . $itr->id . " and result = 2")[0]->countNum * 100 / count($qEntries));
-            $itr->ans3 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' and qoqId = ' . $itr->id . " and result = 3")[0]->countNum * 100 / count($qEntries));
-            $itr->ans4 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' and qoqId = ' . $itr->id . " and result = 4")[0]->countNum * 100 / count($qEntries));
+            $itr->ans0 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
+and qoq_id = ' . $itr->id . " and result = 0")[0]->countNum * 100 / count($qEntries));
+            $itr->ans1 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
+and qoq_id = ' . $itr->id . " and result = 1")[0]->countNum * 100 / count($qEntries));
+            $itr->ans2 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
+and qoq_id = ' . $itr->id . " and result = 2")[0]->countNum * 100 / count($qEntries));
+            $itr->ans3 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
+and qoq_id = ' . $itr->id . " and result = 3")[0]->countNum * 100 / count($qEntries));
+            $itr->ans4 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
+and qoq_id = ' . $itr->id . " and result = 4")[0]->countNum * 100 / count($qEntries));
         }
 
         return view('report3', array('qoq' => $qoq, 'qId' => $qId));
@@ -437,8 +446,8 @@ azmoon.cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry
         $cities = $this->getCitiesInQuiz($quizId);
 
         foreach ($cities as $city) {
-            $city->lessons = DB::select('select AVG(percent) as avgPercent, lessons.nameL as name from medal_db.qentry qR, azmoon.students as std_, medal.taraz,
- medal.lessons WHERE lessons.id = l_id and qR.u_id = std_.id and ' . 'q_id = ' . $quizId . ' and city_id = ' . $city->id . " and (select
+            $city->lessons = DB::select('select AVG(percent) as avgPercent, lessons.nameL as name from medal_db.qentry qR, azmoon.students as std_, medal_db.taraz,
+ medal_db.lessons WHERE lessons.id = l_id and qR.u_id = std_.id and ' . 'q_id = ' . $quizId . ' and city_id = ' . $city->id . " and (select
  count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0" . ' group by(l_id)');
         }
 
@@ -451,10 +460,9 @@ azmoon.cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry
         $cities = $this->getCitiesInQuiz($quizId);
 
         foreach ($cities as $city) {
-            $city->lessons = DB::select('select AVG(percent) as avgPercent, lessons.nameL as name from medal.qentry qR, azmoon.students as std_, medal.taraz, medal.lessons WHERE lessons.id = lId and qR.u_id = std_.id and ' .
-                'qId = ' . $quizId . ' and city_id = ' . $city->id .
-                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0" .
-                ' group by(lId)');
+            $city->lessons = DB::select('select AVG(percent) as avgPercent, lessons.nameL as name from medal_db.qentry qR, azmoon.students as std_, medal_db
+.taraz, medal_db.lessons WHERE lessons.id = l_id and qR.u_id = std_.id and ' . 'q_id = ' . $quizId . ' and city_id = ' . $city->id . " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0" .
+                ' group by(l_id)');
         }
 
         $objPHPExcel = new PHPExcel();
@@ -553,7 +561,7 @@ azmoon.cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry
 
             $user->lessons = $tmp;
 
-            $target = StudentPanel::whereId($user->uId);
+            $target = StudentPanel::whereId($user->u_id);
 
             if($target == null) {
                 array_splice($users, $i);
@@ -623,7 +631,7 @@ azmoon.cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry
 
             $user->lessons = $tmp;
 
-            $target = StudentPanel::whereId($user->uId);
+            $target = StudentPanel::whereId($user->u_id);
             $user->name = $target->first_name . " " . $target->last_name;
             $user->uId = $target->id;
 
@@ -787,12 +795,10 @@ azmoon.cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry
         $total = ROQ::whereQoqId($qInfos[0]->qoqId)->count();
 
         foreach ($qInfos as $qInfo) {
-            $condition = ['qoqId' => $qInfo->qoqId,
-                'result' => 0];
+            $condition = ['qoq_id' => $qInfo->qoqId, 'result' => 0];
             $qInfo->white = ROQ::where($condition)->count();
 
-            $condition = ['qoqId' => $qInfo->qoqId,
-                'result' => $qInfo->ans];
+            $condition = ['qoq_id' => $qInfo->qoqId, 'result' => $qInfo->ans];
             $qInfo->correct = ROQ::where($condition)->count();
         }
 
@@ -955,8 +961,9 @@ and Q.quiz_id = qR.q_id) > 0");
 
         $lessons = getLessonQuiz($quizId);
 
-        $total = DB::select('SELECT count(*) as total FROM qentry qR WHERE qId = ' . $quizId .
-            " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
+        $total = DB::select('SELECT count(*) as total FROM qentry qR WHERE q_id = ' . $quizId .
+            " and (select count(*) from roq r, qoq Q where r.u_id =
+ qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
 
         if($total == null || count($total) == 0 || empty($total->total))
             $total = 0;
@@ -965,50 +972,49 @@ and Q.quiz_id = qR.q_id) > 0");
 
         foreach ($lessons as $lesson) {
 
-            $tmp = DB::select('select count(*) as countNum from qentry qR, taraz WHERE qId = ' . $quizId .
-                " and " .
-                'percent < ' . $ceil[0] . ' and percent > ' . $floor[0] . ' and lId = ' . $lesson->id .
-                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
+            $tmp = DB::select('select count(*) as countNum from qentry qR, taraz WHERE q_id = ' . $quizId .
+                " and " . 'percent < ' . $ceil[0] . ' and percent > ' . $floor[0] .
+' and l_id = ' . $lesson->id . " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
 
             if($tmp != null && count($tmp) > 0)
                 $lesson->group_0 = $tmp[0]->countNum;
             else
                 $lesson->group_0 = 0;
 
-            $tmp = DB::select('select count(*) as countNum from qentry qR, taraz WHERE qId = ' . $quizId .
-                " and " .
-                'percent < ' . $ceil[1] . ' and percent > ' . $floor[1] . ' and lId = ' . $lesson->id .
-                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
+            $tmp = DB::select('select count(*) as countNum from qentry qR, taraz WHERE q_id = ' . $quizId .
+                " and " . 'percent < ' . $ceil[1] . ' and percent > ' . $floor[1] . ' and l_id = ' . $lesson->id .
+                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q
+.id and Q.quiz_id = qR.q_id) > 0");
 
             if($tmp != null && count($tmp) > 0)
                 $lesson->group_1 = $tmp[0]->countNum;
             else
                 $lesson->group_1 = 0;
 
-            $tmp = DB::select('select count(*) as countNum from qentry qR, taraz WHERE qId = ' . $quizId .
-                " and " .
-                'percent < ' . $ceil[2] . ' and percent > ' . $floor[2] . ' and lId = ' . $lesson->id .
-                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
+            $tmp = DB::select('select count(*) as countNum from qentry qR, taraz WHERE q_id = ' . $quizId .
+                " and " . 'percent < ' . $ceil[2] . ' and percent > ' . $floor[2] . ' and l_id = ' . $lesson->id .
+                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q
+.id and Q.quiz_id = qR.q_id) > 0");
 
             if($tmp != null && count($tmp) > 0)
                 $lesson->group_2 = $tmp[0]->countNum;
             else
                 $lesson->group_2 = 0;
 
-            $tmp = DB::select('select count(*) as countNum from qentry qR, taraz WHERE qId = ' . $quizId .
-                " and " .
-                'percent < ' . $ceil[3] . ' and percent > ' . $floor[3] . ' and lId = ' . $lesson->id .
-                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
+            $tmp = DB::select('select count(*) as countNum from qentry qR, taraz WHERE q_id = ' . $quizId .
+                " and " . 'percent < ' . $ceil[3] . ' and percent > ' . $floor[3] . ' and l_id = ' . $lesson->id .
+                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id
+ and Q.quiz_id = qR.q_id) > 0");
 
             if($tmp != null && count($tmp) > 0)
                 $lesson->group_3 = $tmp[0]->countNum;
             else
                 $lesson->group_3 = 0;
 
-            $tmp = DB::select('select count(*) as countNum from qentry qR, taraz WHERE qId = ' . $quizId .
-                " and " .
-                'percent < ' . $ceil[4] . ' and percent > ' . $floor[4] . ' and lId = ' . $lesson->id .
-                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
+            $tmp = DB::select('select count(*) as countNum from qentry qR, taraz WHERE q_id = ' . $quizId .
+                " and " . 'percent < ' . $ceil[4] . ' and percent > ' . $floor[4] . ' and l_id = ' . $lesson->id .
+                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q
+.id and Q.quiz_id = qR.q_id) > 0");
 
             if($tmp != null && count($tmp) > 0)
                 $lesson->group_4 = $tmp[0]->countNum;
@@ -1194,9 +1200,9 @@ and Q.quiz_id = qR.q_id) > 0");
 
         foreach ($cities as $city) {
 
-            $lessons = DB::select('select coherence, percent from azmoon.students as rd, medal.taraz as taraz, medal.qentry qR, medal.lessons as lesson WHERE lesson.id = lId and rd.city_id = ' . $city->id .
-                ' and qR.q_id = ' . $quizId . ' and rd.id = qR.u_id' .
-                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
+            $lessons = DB::select('select coherence, percent from azmoon.students as rd, medal_db.taraz as taraz, medal_db.qentry qR, medal_db.lessons as lesson WHERE lesson.id = l_id and rd.city_id = ' . $city->id .
+                ' and qR.q_id = ' . $quizId . ' and rd.id = qR.u_id' . " and (select
+ count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
 
             $count = 0;
             $sum = 0;
@@ -1250,9 +1256,9 @@ and Q.quiz_id = qR.q_id) > 0");
 
         foreach ($cities as $city) {
 
-            $lessons = DB::select('select coherence, percent from azmoon.students as rd, medal.taraz as taraz, medal.qentry qR, medal.lessons as lesson WHERE lesson.id = lId and rd.city_id = ' . $city->id .
-                ' and qR.q_id = ' . $quizId . ' and rd.id = qR.u_id' .
-                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
+            $lessons = DB::select('select coherence, percent from azmoon.students as rd, medal_db.taraz as taraz, medal_db.qentry qR, medal_db.lessons as lesson WHERE lesson.id = l_id and rd.city_id = ' . $city->id .
+                ' and qR.q_id = ' . $quizId . ' and rd.id = qR.u_id' . " and (select
+ count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
 
             $count = 0;
             $sum = 0;
@@ -1361,12 +1367,11 @@ as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
 
     public function A3($quizId, $uId, $backURL = "") {
 
-        $condition = ['qId' => $quizId, 'uId' => $uId];
+        $condition = ['q_id' => $quizId, 'u_id' => $uId];
         $qEntryId = QEntry::where($condition)->first();
         $tmp = QOQ::whereQuizId($quizId)->first();
 
-        if($tmp == null || count($tmp) == 0 || $qEntryId == null || count($qEntryId) == 0  ||
-            ($qEntryId->online == 1 && empty($qEntryId->timeEntry))) {
+        if($tmp == null || $qEntryId == null || ($qEntryId->online == 1 && empty($qEntryId->timeEntry))) {
 
             if(empty($backURL))
                 return $this->preA3($quizId, 'فرد مورد نظر در آزمون شرکت نکرده است');
@@ -1374,7 +1379,7 @@ as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
                 return $this->A5($quizId, 'فرد مورد نظر در آزمون شرکت نکرده است');
         }
 
-        $condition = ['qoqId' => $tmp->id, 'uId' => $uId];
+        $condition = ['qoq_id' => $tmp->id, 'u_id' => $uId];
 
         if(ROQ::where($condition)->count() == 0) {
             if(empty($backURL))

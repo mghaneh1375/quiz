@@ -96,7 +96,8 @@ class KarnameController extends Controller {
                         case 3:
                             $roqs = DB::select('select roq.result, qoq.question_id, questions.ans, questions.attempt, questions.solved from roq, qoq, questions WHERE questions.id = qoq.question_id and qoq.quiz_id = ' . $quizId . ' and roq.qoq_id = qoq.id and roq.u_id = ' . $uId . ' order by qoq.qNo ASC');
                             $qInfo = getQOQ($quizId, true);
-                            return view('questionKarname', array('quiz_id' => $quizId, 'questions' => $qInfo, 'roqs' => $roqs));
+                            return view('questionKarname', array('quizId' => $quizId, 'questions' => $qInfo, 'roqs'
+                            => $roqs));
                         case 4:
                             return $this->showCompassKarname($uId, $quizId, $kindKarname);
                     }
@@ -183,7 +184,7 @@ class KarnameController extends Controller {
         if($kindKarname->lessonMark)
             $totalMark = Quiz::whereId($quizId)->mark;
 
-        return view('generalKarname', array('quiz_id' => $quizId, 'status' => $status, 'kindKarname' => $kindKarname,
+        return view('generalKarname', array('quizId' => $quizId, 'status' => $status, 'kindKarname' => $kindKarname,
             'rank' => $rank, 'rankInLessonCity' => $rankInLessonCity, 'rankInLesson' => $rankInLesson,
             'lessons' => $lessons, 'taraz' => $taraz, 'rankInLessonState' => $rankInLessonState, 'stateRank' => $stateRank,
             'avgs' => $avgs, 'roq' => $roq, 'cityRank' => $cityRank, "totalMark" => $totalMark));
@@ -199,9 +200,11 @@ class KarnameController extends Controller {
             $status = QuizStatus::whereLevel(2)->get();
 
         if($kindKarname->subjectAvg &&  $kindKarname->subjectMaxPercent)
-            $avgs = DB::select('select SUM(percent) / count(*) as avg, MAX(percent) as maxPercent FROM subjects_percent, subjects WHERE qId = ' . $quizId . ' and subjects.id = sId and subjects.id_l = ' . $lId . ' GROUP by(sId)');
+            $avgs = DB::select('select SUM(percent) / count(*) as avg, MAX(percent) as maxPercent FROM subjects_percent, subjects WHERE q_id = 
+' . $quizId . ' and subjects.id = s_id and subjects.id_l = ' . $lId . ' GROUP by(s_id)');
         else if($kindKarname->subjectAvg)
-            $avgs = DB::select('select SUM(percent) / count(*) as avg FROM subjects_percent WHERE qId = ' . $quizId . ' and subjects.id = sId and subjects.id_l = ' . $lId . ' GROUP by(sId)');
+            $avgs = DB::select('select SUM(percent) / count(*) as avg FROM subjects_percent WHERE qId = ' . $quizId . ' and subjects.id = sId and subjects
+.id_l = ' . $lId . ' GROUP by(s_id)');
 
         $cityRank = array();
         $stateRank = array();
@@ -212,7 +215,9 @@ class KarnameController extends Controller {
         if($kindKarname->subjectCityRank) {
             $counter = 0;
             foreach ($subjects as $subject) {
-                $tmp = DB::select('SELECT subjects_percent.u_id, subjects_percent.percent as taraz from azmoon.students std, azmoon.cities ci, subjects_percent WHERE std.id = subjects_percent.u_id and std.city_id = ' . $cityId . ' and subjects_percent.q_id = ' . $quizId . ' and subjects_percent.sId = ' . $subject->id . ' ORDER by subjects_percent.percent DESC');
+                $tmp = DB::select('SELECT subjects_percent.u_id, subjects_percent.percent as taraz from azmoon.students std, azmoon.cities ci, 
+subjects_percent WHERE std.id = subjects_percent.u_id and std.city_id = ' . $cityId . ' and subjects_percent.q_id = ' . $quizId .
+                    ' and subjects_percent.s_id = ' . $subject->id . ' ORDER by subjects_percent.percent DESC');
                 $cityRank[$counter++] = $this->getRank($tmp, $uId);
             }
         }
@@ -229,7 +234,9 @@ class KarnameController extends Controller {
         if($kindKarname->subjectCountryRank) {
             $counter = 0;
             foreach ($subjects as $subject) {
-                $tmp = DB::select('SELECT subjects_percent.u_id, subjects_percent.percent as taraz from subjects_percent WHERE subjects_percent.q_id = ' . $quizId . ' and subjects_percent.sId = ' . $subject->id . ' ORDER by subjects_percent.percent DESC');
+                $tmp = DB::select('SELECT subjects_percent.u_id, subjects_percent.percent as taraz from subjects_percent WHERE subjects_percent.q_id = ' . $quizId .
+
+' and subjects_percent.s_id = ' . $subject->id . ' ORDER by subjects_percent.percent DESC');
                 $countryRank[$counter++] = $this->getRank($tmp, $uId);
             }
         }
@@ -247,7 +254,8 @@ class KarnameController extends Controller {
 
         $minusMark = Quiz::whereId($quizId)->minusMark;
 
-        return view('subjectKarname', array('quiz_id' => $quizId, 'status' => $status, 'roq' => $roq, 'subjects' => $subjects,
+        return view('subjectKarname', array('quizId' => $quizId, 'status' => $status, 'roq' => $roq, 'subjects' =>
+            $subjects,
             'kindKarname' => $kindKarname, 'avgs' => $avgs, 'cityRank' => $cityRank, 'stateRank' => $stateRank,
             'countryRank' => $countryRank, 'totalMark' => $totalMark, 'minusMark' => $minusMark));
     }
@@ -261,11 +269,14 @@ class KarnameController extends Controller {
         if($kindKarname->compassStatus)
             $status = QuizStatus::whereLevel(3)->get();
 
-        if($kindKarname->compassAvg &&  $kindKarname->compassMaxPercent)
+        if($kindKarname->compassAvg && $kindKarname->compassMaxPercent)
             $avgs = DB::select('select SUM(percent) / count(*) as avg, MAX(percent) as maxPercent FROM compasses_percent WHERE q_id = ' . $quizId . ' GROUP 
 by(c_id)');
-        else if($kindKarname->subjectAvg)
+        else if($kindKarname->compassAvg)
             $avgs = DB::select('select SUM(percent) / count(*) as avg FROM compasses_percent WHERE q_id = ' . $quizId . ' GROUP by(c_id)');
+        else if($kindKarname->compassMaxPercent)
+            $avgs = DB::select('select MAX(percent) as maxPercent FROM compasses_percent WHERE q_id = ' . $quizId . ' GROUP 
+by(c_id)');
 
         $cityRank = array();
         $stateRank = array();
@@ -311,7 +322,8 @@ by(c_id)');
 
         $minusMark = Quiz::whereId($quizId)->minusMark;
 
-        return view('compassKarname', array('quiz_id' => $quizId, 'status' => $status, 'roq' => $roq, 'compasses' => $compasses,
+        return view('compassKarname', array('quizId' => $quizId, 'status' => $status, 'roq' => $roq, 'compasses' =>
+            $compasses,
             'kindKarname' => $kindKarname, 'avgs' => $avgs, 'cityRank' => $cityRank, 'stateRank' => $stateRank,
             'countryRank' => $countryRank, 'totalMark' => $totalMark, 'minusMark' => $minusMark));
     }
@@ -355,7 +367,7 @@ by(c_id)');
     
     private function getRank($tmp, $uId) {
         for($j = 0; $j < count($tmp); $j++) {
-            if($tmp[$j]->uId == $uId) {
+            if($tmp[$j]->u_id == $uId) {
                 $r = $j + 1;
                 $currTaraz = $tmp[$j]->taraz;
                 $k = $j - 1;
@@ -372,7 +384,7 @@ by(c_id)');
     private function calcRank($quizId, $uId) {
         $ranks = DB::select('SELECT qentry.u_id, sum(taraz.taraz * (SELECT lessons.coherence FROM lessons WHERE lessons.id = taraz.l_id)) as weighted_avg from qentry, taraz WHERE qentry.id = taraz.q_entry_id and qentry.q_id = ' . $quizId . ' GROUP by (qentry.u_id) ORDER by weighted_avg DESC');
         for($i = 0; $i < count($ranks); $i++) {
-            if($ranks[$i]->uId == $uId) {
+            if($ranks[$i]->u_id == $uId) {
                 $r = $i + 1;
                 $currTaraz = $ranks[$i]->weighted_avg;
                 $k = $i - 1;
@@ -389,7 +401,7 @@ by(c_id)');
     private function calcRankInCity($quizId, $uId, $cityId) {
         $ranks = DB::select('SELECT qentry.u_id, sum(taraz.taraz * (SELECT lessons.coherence FROM lessons WHERE lessons.id = taraz.l_id)) as weighted_avg from qentry, taraz, azmoon.students std WHERE qentry.id = taraz.q_entry_id and qentry.u_id = std.id AND std.city_id = ' . $cityId . ' and qentry.q_id = ' . $quizId . ' GROUP by (qentry.u_id) ORDER by weighted_avg DESC');
         for($i = 0; $i < count($ranks); $i++) {
-            if($ranks[$i]->uId == $uId) {
+            if($ranks[$i]->u_id == $uId) {
                 $r = $i + 1;
                 $currTaraz = $ranks[$i]->weighted_avg;
                 $k = $i - 1;
@@ -406,7 +418,7 @@ by(c_id)');
     private function calcRankInState($quizId, $uId, $stateId) {
         $ranks = DB::select('SELECT qentry.u_id, sum(taraz.taraz * (SELECT lessons.coherence FROM lessons WHERE lessons.id = taraz.l_id)) as weighted_avg from qentry, taraz, azmoon.students std, azmoon.cities ci WHERE qentry.id = taraz.q_entry_id and qentry.u_id = std.id AND std.city_id = ci.id and ci.state_id = ' . $stateId . ' and qentry.q_id = ' . $quizId . ' GROUP by (qentry.u_id) ORDER by weighted_avg DESC');
         for($i = 0; $i < count($ranks); $i++) {
-            if($ranks[$i]->uId == $uId) {
+            if($ranks[$i]->u_id == $uId) {
                 $r = $i + 1;
                 $currTaraz = $ranks[$i]->weighted_avg;
                 $k = $i - 1;
