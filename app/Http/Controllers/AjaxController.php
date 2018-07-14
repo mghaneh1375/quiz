@@ -223,7 +223,7 @@ class AjaxController extends Controller {
                 return;
             }
 
-            $quizId = $quizId->qId;
+            $quizId = $quizId->q_id;
             $enherafMeyars = Enheraf::whereQId($quizId)->get();
             if ($enherafMeyars == null || count($enherafMeyars) == 0) {
                 echo "nok";
@@ -231,7 +231,7 @@ class AjaxController extends Controller {
             }
 
             foreach ($enherafMeyars as $itr) {
-                $lId = $itr->lId;
+                $lId = $itr->l_id;
                 $enherafMeyar = $itr->val;
                 $lessonAVG = $itr->lessonAVG;
                 $conditions = ["q_entry_id" => $qEntryId, "l_id" => $lId];

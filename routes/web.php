@@ -18,19 +18,19 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('getQuizLessons', array('as' => 'getQuizLessons', 'uses' => 'AjaxController@getQuizLessons'));
 
-Route::group(array('before' => 'auth|levelController:1'), function () {
+Route::group(array('middleware' => ['auth', 'levelController:1']), function () {
 
-    Route::any('createTarazTable', 'TarazController@createTarazTable');
+    Route::any('createTarazTable', ['as' => 'createTarazTable', 'uses' => 'TarazController@createTarazTable']);
 
-    Route::any('deleteTarazTable', 'TarazController@deleteTarazTable');
+    Route::any('deleteTarazTable', ['as' => 'deleteTarazTable', 'uses' => 'TarazController@deleteTarazTable']);
 });
 
-Route::group(array('before' => 'auth|levelController:1'), function () {
+Route::group(array('middleware' => 'auth|levelController:1'), function () {
 
     Route::any('defineKarname', 'KarnameController@defineKarname');
 });
 
-Route::group(array('before' => 'auth|levelController:1'), function () {
+Route::group(array('middleware' => ['auth', 'levelController:1']), function () {
 
     Route::post('getLessonsByChangingDegree', 'AjaxController@getLessons');
 
@@ -52,14 +52,14 @@ Route::group(array('before' => 'auth|levelController:1'), function () {
 
 });
 
-Route::group(array('before' => 'auth|levelController:1'), function () {
+Route::group(array('middleware' => ['auth', 'levelController:1']), function () {
 
     Route::get('createBox', 'BoxController@createBox');
 
     Route::any('seeBoxes', 'BoxController@seeBoxes');
 });
 
-Route::group(array('before' => 'auth|levelController:1'), function (){
+Route::group(array('middleware' => ['auth', 'levelController:1']), function (){
 
     Route::get('logout', 'HomeController@logout');
 
@@ -76,7 +76,7 @@ Route::group(array('before' => 'auth|levelController:1'), function (){
     Route::any('editQuiz={quiz_id}', 'QuizController@editQuiz');
 });
 
-Route::group(array('before' => 'auth'), function (){
+Route::group(array('middleware' => 'auth'), function (){
 
     Route::get('/', array('as' => 'home', 'uses' => 'HomeController@showHome'));
 
@@ -98,7 +98,7 @@ Route::group(array('before' => 'auth'), function (){
 
     Route::post('getEnherafMeyar', 'AjaxController@getEnherafMeyar');
 
-    Route::post('calcTaraz', 'AjaxController@calcTaraz');
+    Route::post('calcTaraz', ['as' => 'calcTaraz', 'uses' => 'AjaxController@calcTaraz']);
 
     Route::post('fillSubjectsPercentTable', 'AjaxController@fillSubjectsPercentTable');
 
@@ -107,7 +107,7 @@ Route::group(array('before' => 'auth'), function (){
     Route::post('getQuizCities', array('as' => 'getQuizCities', 'uses' => 'AjaxController@getQuizCities'));
 });
 
-Route::group(array('before' => 'auth'), function (){
+Route::group(array('middleware' => 'auth'), function (){
 
     Route::get('reports/{quiz_id}', array('as' => 'reports', 'uses' => 'ReportController@reports'));
 
@@ -138,9 +138,7 @@ Route::group(array('before' => 'auth'), function (){
     Route::get('A6/{quiz_id}', array('as' => 'A6', 'uses' => 'ReportController@A6'));
 
     Route::get('A6Excel/{quiz_id}', array('as' => 'A6Excel', 'uses' => 'ReportController@A6Excel'));
-
-
-
+    
     Route::get('showReport', array('as' => 'showReport', 'uses' => 'ReportController@showReport'));
 
     Route::get('questionAnalysis/{quiz_id}/{lessonId}', array('as' => 'questionAnalysis', 'uses' => 'ReportController@questionAnalysis'));
@@ -155,8 +153,8 @@ Route::group(array('before' => 'auth'), function (){
 
 });
 
-Route::get('login','HomeController@login');
+Route::get('login','HomeController@login')->name('login');
 
-Route::post('login', 'HomeController@doLogin');
+Route::post('login', 'HomeController@doLogin')->name('doLogin');
 
-Route::post('deleteQuiz', 'HomeController@deleteQuiz');
+Route::post('deleteQuiz', 'HomeController@deleteQuiz')->name('deleteQuiz');

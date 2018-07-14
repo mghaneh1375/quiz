@@ -79,4 +79,8 @@ class User extends Authenticatable{
 	public static function whereId($value) {
 		return User::find($value);
 	}
+
+	public function student() {
+		return $this->hasOne('\App\models\Student', 'id', 'cId');
+	}
 }

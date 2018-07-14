@@ -105,10 +105,10 @@ class KarnameController extends Controller {
         }
         $quizes = array();
         if($uId != -1) {
-            $myQuizes = QEntry::whereUId($uId)->select('qId')->get();
+            $myQuizes = QEntry::whereUId($uId)->select('q_id')->get();
             $quizes = array();
             for($i = 0; $i < count($myQuizes); $i++)
-                $quizes[$i] = Quiz::whereId($myQuizes[$i]->qId)->select('id', 'QN')->first();
+                $quizes[$i] = Quiz::whereId($myQuizes[$i]->q_id)->select('id', 'QN')->first();
         }
         return view('karname', array('quizes' => $quizes, 'msg' => $msg, 'selectedQuiz' => $quizId));
     }

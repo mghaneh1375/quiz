@@ -35,9 +35,9 @@ class HomeController extends Controller {
 
         if(User::whereUsername($username)->count() == 0) {
 
-            $tmp = UserPanel::whereUserPanel($username)->first();
+            $tmp = UserPanel::whereUsername($username)->first();
 
-            if ($tmp != null && count($tmp) > 0 && Hash::check($password, $tmp->password)) {
+            if ($tmp != null && Hash::check($password, $tmp->password)) {
                 $stdTmp = StudentPanel::whereId($tmp->id);
                 if ($stdTmp != null && Etehadiye::where('NationalID', '=', $stdTmp->IDNumber)->count() > 0) {
 
@@ -56,19 +56,19 @@ class HomeController extends Controller {
 
                         if(Student::whereId($stdTmp->id) == null) {
                             switch ($field->id) {
-                            case 32:
-                                $degree = 34;
-                                break;
-                            case 33:
-                                $degree = 37;
-                                break;
-                            case 34:
-                                $degree = 38;
-                                break;
+                                case 32:
+                                    $degree = 34;
+                                    break;
+                                case 33:
+                                    $degree = 37;
+                                    break;
+                                case 34:
+                                    $degree = 38;
+                                    break;
 
-                            default:
-                                $degree = 0;
-                                break;
+                                default:
+                                    $degree = 0;
+                                    break;
                             }
                             $std = new Student();
                             $std->id = $stdTmp->id;

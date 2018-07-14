@@ -631,7 +631,7 @@ class QuizController extends Controller {
                 $qId = makeValidInput($_POST["quiz_id"]);
                 $uId = Auth::user()->id;
 
-                $condition = ["qId" => $qId, "uId" => $uId];
+                $condition = ["q_id" => $qId, "u_id" => $uId];
                 $entry = QEntry::where($condition)->select('status', 'timeEntry', 'dateEntry')->get();
 
                 $mode = "normal";

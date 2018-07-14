@@ -8,7 +8,7 @@
     <script>
 
         var quiz_id = "{{$quizId}}";
-        var qEntryIds = {{ json_encode($qEntryIds)}};
+        var qEntryIds = {!! json_encode($qEntryIds) !!};
         var percent = 0;
         var unit;
 
@@ -29,7 +29,7 @@
         function calcTaraz(qEntryId) {
             $.ajax({
                 type: 'post',
-                url: 'calcTaraz',
+                url: '{{route('calcTaraz')}}',
                 data: {
                     qEntryId: qEntryId
                 },
