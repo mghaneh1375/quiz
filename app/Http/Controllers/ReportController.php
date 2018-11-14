@@ -9,8 +9,8 @@ use App\models\QOQ;
 use App\models\Question;
 use App\models\Quiz;
 use App\models\ROQ;
-use App\models\StudentPanel;
 use App\models\Taraz;
+use App\models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use PHPExcel;
@@ -298,7 +298,7 @@ class ReportController extends Controller {
 
     public function report1($qId, $stateId) { // استانی بر به تفکیک جنسیت
 
-        $qEntries = DB::select("select qentry.id, qentry.u_id FROM medal_db.qentry as qentry, azmoon.students as std_, azmoon.cities as city WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and city.id = std_.city_id and city.state_id = " . $stateId);
+        $qEntries = DB::select("select qentry.id, qentry.u_id FROM qentry as qentry, users_azmoon as std_, cities as city WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and city.id = std_.city_id and city.state_id = " . $stateId);
 
         $girls = $boys = 0;
 
@@ -311,7 +311,7 @@ class ReportController extends Controller {
 
         foreach ($qEntries as $qEntry) {
 
-            $sex = DB::select("select std_.school_sex_id as sex FROM azmoon.students as std_ WHERE std_.id = " .
+            $sex = DB::select("select std_.sex_id as sex FROM users_azmoon as std_ WHERE std_.id = " .
                 $qEntry->u_id);
 
             if($sex[0]->sex == $this->girlSex)
@@ -355,7 +355,7 @@ class ReportController extends Controller {
 
     public function report2($qId, $stateId) { // استانی بر به تفکیک جنسیت
 
-        $qEntries = DB::select("select qentry.id, qentry.u_id, std_.school_sex_id as sex FROM medal_db.qentry as qentry, azmoon.students as std_, azmoon.cities as city WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and city.id = std_.city_id and city.state_id = " . $stateId);
+        $qEntries = DB::select("select qentry.id, qentry.u_id, std_.sex_id as sex FROM qentry as qentry, users_azmoon as std_, cities as city WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and city.id = std_.city_id and city.state_id = " . $stateId);
 
         $girls = $boys = 0;
 
@@ -412,21 +412,21 @@ class ReportController extends Controller {
 
     public function report3($qId, $cityId) {
 
-        $qEntries = DB::select("select qentry.id, qentry.u_id FROM medal_db.qentry as qentry, azmoon.students as std_ WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and std_.city_id = " . $cityId);
+        $qEntries = DB::select("select qentry.id, qentry.u_id FROM qentry as qentry, users_azmoon as std_ WHERE qentry.q_id = " . $qId . " and std_.id = qentry.u_id and std_.city_id = " . $cityId);
 
         $qoq = QOQ::whereQuizId($qId)->orderBy('qNo', 'ASC')->get();
 
         foreach ($qoq as $itr) {
             $itr->ans = Question::whereId($itr->question_id)->ans;
-            $itr->ans0 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
+            $itr->ans0 = round(DB::select('select count(*) as countNum from roq, users_azmoon as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
 and qoq_id = ' . $itr->id . " and result = 0")[0]->countNum * 100 / count($qEntries));
-            $itr->ans1 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
+            $itr->ans1 = round(DB::select('select count(*) as countNum from roq, users_azmoon as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
 and qoq_id = ' . $itr->id . " and result = 1")[0]->countNum * 100 / count($qEntries));
-            $itr->ans2 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
+            $itr->ans2 = round(DB::select('select count(*) as countNum from roq, users_azmoon as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
 and qoq_id = ' . $itr->id . " and result = 2")[0]->countNum * 100 / count($qEntries));
-            $itr->ans3 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
+            $itr->ans3 = round(DB::select('select count(*) as countNum from roq, users_azmoon as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
 and qoq_id = ' . $itr->id . " and result = 3")[0]->countNum * 100 / count($qEntries));
-            $itr->ans4 = round(DB::select('select count(*) as countNum from roq, azmoon.students as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
+            $itr->ans4 = round(DB::select('select count(*) as countNum from roq, users_azmoon as std_ WHERE std_.id = roq.u_id and std_.city_id = ' . $cityId . ' 
 and qoq_id = ' . $itr->id . " and result = 4")[0]->countNum * 100 / count($qEntries));
         }
 
@@ -436,8 +436,8 @@ and qoq_id = ' . $itr->id . " and result = 4")[0]->countNum * 100 / count($qEntr
 
     public function getCitiesInQuiz($quizId) {
 
-        return DB::select("select std_.city_id as id, cities.name, count(*) as total FROM medal_db.qentry as qentry, azmoon.students as std_, 
-azmoon.cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry.u_id and  cities.id = std_.city_id group by(std_.city_id)");
+        return DB::select("select std_.city_id as id, cities.name, count(*) as total FROM qentry as qentry, users_azmoon as std_, 
+cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry.u_id and  cities.id = std_.city_id group by(std_.city_id)");
 
     }
 
@@ -446,8 +446,8 @@ azmoon.cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry
         $cities = $this->getCitiesInQuiz($quizId);
 
         foreach ($cities as $city) {
-            $city->lessons = DB::select('select AVG(percent) as avgPercent, lessons.nameL as name from medal_db.qentry qR, azmoon.students as std_, medal_db.taraz,
- medal_db.lessons WHERE lessons.id = l_id and qR.u_id = std_.id and ' . 'q_id = ' . $quizId . ' and city_id = ' . $city->id . " and (select
+            $city->lessons = DB::select('select AVG(percent) as avgPercent, lessons.nameL as name from qentry qR, users_azmoon as std_, taraz,
+ lessons WHERE lessons.id = l_id and qR.u_id = std_.id and ' . 'q_id = ' . $quizId . ' and city_id = ' . $city->id . " and (select
  count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0" . ' group by(l_id)');
         }
 
@@ -455,13 +455,12 @@ azmoon.cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry
     }
 
     public function A2Excel($quizId) {
-
-
+        
         $cities = $this->getCitiesInQuiz($quizId);
 
         foreach ($cities as $city) {
-            $city->lessons = DB::select('select AVG(percent) as avgPercent, lessons.nameL as name from medal_db.qentry qR, azmoon.students as std_, medal_db
-.taraz, medal_db.lessons WHERE lessons.id = l_id and qR.u_id = std_.id and ' . 'q_id = ' . $quizId . ' and city_id = ' . $city->id . " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0" .
+            $city->lessons = DB::select('select AVG(percent) as avgPercent, lessons.nameL as name from qentry qR, users_azmoon as std_, quizayan_quiz
+.taraz, lessons WHERE lessons.id = l_id and qR.u_id = std_.id and ' . 'q_id = ' . $quizId . ' and city_id = ' . $city->id . " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0" .
                 ' group by(l_id)');
         }
 
@@ -561,7 +560,7 @@ azmoon.cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry
 
             $user->lessons = $tmp;
 
-            $target = StudentPanel::whereId($user->u_id);
+            $target = User::whereId($user->u_id);
 
             if($target == null) {
                 array_splice($users, $i);
@@ -631,7 +630,7 @@ azmoon.cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry
 
             $user->lessons = $tmp;
 
-            $target = StudentPanel::whereId($user->u_id);
+            $target = User::whereId($user->u_id);
             $user->name = $target->first_name . " " . $target->last_name;
             $user->uId = $target->id;
 
@@ -1200,7 +1199,7 @@ and Q.quiz_id = qR.q_id) > 0");
 
         foreach ($cities as $city) {
 
-            $lessons = DB::select('select coherence, percent from azmoon.students as rd, medal_db.taraz as taraz, medal_db.qentry qR, medal_db.lessons as lesson WHERE lesson.id = l_id and rd.city_id = ' . $city->id .
+            $lessons = DB::select('select coherence, percent from users_azmoon as rd, taraz as taraz, qentry qR, lessons as lesson WHERE lesson.id = l_id and rd.city_id = ' . $city->id .
                 ' and qR.q_id = ' . $quizId . ' and rd.id = qR.u_id' . " and (select
  count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
 
@@ -1256,7 +1255,7 @@ and Q.quiz_id = qR.q_id) > 0");
 
         foreach ($cities as $city) {
 
-            $lessons = DB::select('select coherence, percent from azmoon.students as rd, medal_db.taraz as taraz, medal_db.qentry qR, medal_db.lessons as lesson WHERE lesson.id = l_id and rd.city_id = ' . $city->id .
+            $lessons = DB::select('select coherence, percent from users_azmoon as rd, taraz as taraz, qentry qR, lessons as lesson WHERE lesson.id = l_id and rd.city_id = ' . $city->id .
                 ' and qR.q_id = ' . $quizId . ' and rd.id = qR.u_id' . " and (select
  count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0");
 
@@ -1355,7 +1354,7 @@ and Q.quiz_id = qR.q_id) > 0");
 
     public function preA3($quizId, $err = "") {
 
-        $uIds = DB::select('select users.id, users.first_name as firstName, users.last_name as lastName from medal_db.qentry qR, azmoon.students 
+        $uIds = DB::select('select users.id, users.first_name as firstName, users.last_name as lastName from qentry qR, users_azmoon 
 as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
             " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id 
  and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0"

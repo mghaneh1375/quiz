@@ -58,7 +58,6 @@ class AjaxController extends Controller {
         $to = makeValidInput($_POST["to"]);
         $subjectIds = $_POST["subjectIds"];
         $grades = $_POST["grades"];
-        $compassIds = $_POST["compassIds"];
         $boxName = makeValidInput($_POST["boxName"]);
 
         $box = Box::whereName($boxName)->count();
@@ -78,7 +77,6 @@ class AjaxController extends Controller {
             $item->box_id = $box->id;
             $item->subject_id = makeValidInput($subjectIds[$i]);
             $item->grade = makeValidInput($grades[$i]);
-            $item->compass_id = makeValidInput($compassIds[$i]);
             $item->save();
         }
         echo 1;
@@ -90,7 +88,6 @@ class AjaxController extends Controller {
         $to = makeValidInput($_POST["to"]);
         $subjectIds = $_POST["subjectIds"];
         $grades = $_POST["grades"];
-        $compassIds = $_POST["compassIds"];
         $boxName = makeValidInput($_POST["boxName"]);
         $boxId = makeValidInput($_POST["box_id"]);
 
@@ -116,7 +113,6 @@ class AjaxController extends Controller {
             $item->box_id = $box->id;
             $item->subject_id = makeValidInput($subjectIds[$i]);
             $item->grade = makeValidInput($grades[$i]);
-            $item->compass_id = makeValidInput($compassIds[$i]);
             $item->save();
         }
 
@@ -143,8 +139,6 @@ class AjaxController extends Controller {
                 $boxItem->grade = 'متوسط';
             else
                 $boxItem->grade = 'دشوار';
-
-            $boxItem->compass_id = Compass::whereId($boxItem->compass_id)->name;
 
             $out[$counter++] = $boxItem;
         }
@@ -177,22 +171,34 @@ class AjaxController extends Controller {
 
     public function submitAns() {
 
-        $qoqId = makeValidInput($_POST["qoqId"]);
-        $newVal = makeValidInput($_POST["newVal"]);
+        if(isset($_POST["qoqId"]) && isset($_POST["newVal"])) {
 
-        $uId = Auth::user()->id;
+            $qoqId = makeValidInput($_POST["qoqId"]);
+            $newVal = makeValidInput($_POST["newVal"]);
 
-        if($uId != -1) {
+            $uId = Auth::user()->id;
 
-            $condition = ['u_id' => $uId, 'qoq_id' => $qoqId];
-            $roq = ROQ::where($condition)->first();
+            if ($uId != -1) {
 
+                $condition = ['u_id' => $uId, 'qoq_id' => $qoqId];
+                $roq = ROQ::where($condition)->first();
 
-            if ($roq != null) {
-                $roq->result = $newVal;
-                $roq->save();
+                if ($roq != null) {
+                    $roq->result = $newVal;
+                    $roq->save();
+                    echo "ok";
+                    return;
+                }
+
+                echo "nok1";
+                return;
             }
+
+            echo "nok2";
+            return;
         }
+
+        echo 'nok3';
     }
 
     public function endQuiz() {
@@ -254,13 +260,6 @@ class AjaxController extends Controller {
         echo "nok";
     }
 
-    public function getCompasses() {
-        $compasses = Compass::all();
-        foreach($compasses as $compass) {
-            echo '<option value="'.$compass->id.'">'.$compass->name.'</option>';
-        }
-    }
-
     public function getQuizLessons() {
 
         $qId = makeValidInput($_POST["qId"]);
@@ -274,8 +273,8 @@ class AjaxController extends Controller {
         if(isset($_POST["qId"])) {
 
             $quizId = makeValidInput($_POST["qId"]);
-            echo json_encode(DB::select('select DISTINCT(state.name) as stateName, state.id as stateId FROM azmoon.states as state, azmoon.cities as city, 
-azmoon.students as std_, medal_db.qentry WHERE qentry.q_id = ' . $quizId . ' and std_.id = qentry.u_id and std_.city_id = 
+            echo json_encode(DB::select('select DISTINCT(state.name) as stateName, state.id as stateId FROM states as state, cities as city, 
+users_azmoon as std_, qentry WHERE qentry.q_id = ' . $quizId . ' and std_.id = qentry.u_id and std_.city_id = 
 city.id and city.state_id = state.id'));
 
         }
@@ -286,7 +285,7 @@ city.id and city.state_id = state.id'));
         if(isset($_POST["qId"])) {
 
             $quizId = makeValidInput($_POST["qId"]);
-            echo json_encode(DB::select('select DISTINCT(city.name) as cityName, city.id as cityId FROM azmoon.cities as city, azmoon.students as std_, medal_db
+            echo json_encode(DB::select('select DISTINCT(city.name) as cityName, city.id as cityId FROM cities as city, users_azmoon as std_, quizayan_quiz
 .qentry WHERE qentry.q_id = ' . $quizId . ' and std_.id = qentry.u_id and std_.city_id = city.id'));
 
         }
@@ -295,10 +294,9 @@ city.id and city.state_id = state.id'));
     public function getTotalQ() {
         
         $subjectId = makeValidInput($_POST["subject_id"]);
-        $compassId = makeValidInput($_POST["compass_id"]);
         $level = makeValidInput($_POST["level"]);
 
-        $condition = ['subject_id' => $subjectId, 'compass_id' => $compassId, 'grade' => $level];
+        $condition = ['subject_id' => $subjectId, 'grade' => $level];
 
         echo Question::where($condition)->count();
 

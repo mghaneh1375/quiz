@@ -12,10 +12,9 @@
         function getTotalQuestion(val) {
 
             sId = $("#subjectId_" + val).val();
-            cId = $("#compassId_" + val).val();
             level = $("#grade_" + val).val();
 
-            getTotalQ(sId, cId, level);
+            getTotalQ(sId, level);
         }
     </script>
 @stop
@@ -87,19 +86,16 @@
                 numQuestions = to - from + 1;
 
                 subjectIds = [];
-                compassIds = [];
                 grades = [];
 
                 showIndividualQuestions();
 
                 for (i = 0; i < numQuestions; i++) {
                     subjectIds[i] = 'subjectId_' + (i + from);
-                    compassIds[i] = 'compassId_' + (i + from);
                     grades[i] = 'grade_' + (i + from);
                 }
 
-                getCompasses(compassIds);
-                changeDegreeWithSelectedLesson($("#degree_id").find(":selected").val(), 'lessonId', subjectIds, compassIds, grades, selectedLesson, box_id);
+                changeDegreeWithSelectedLesson($("#degree_id").find(":selected").val(), 'lessonId', subjectIds, grades, selectedLesson, box_id);
             });
 
             function submitNewBox() {
@@ -116,15 +112,13 @@
                 numQuestions = to - from + 1;
                 subjectIds = [];
                 grades = [];
-                compassIds = [];
 
                 for(i = 0; i < numQuestions; i++) {
                     subjectIds[i] = $('#subjectId_' + (from + i) + ' :selected').val();
                     grades[i] = $('#grade_' + (from + i) + ' :selected').val();
-                    compassIds[i] = $('#compassId_' + (from + i) + ' :selected').val();
                 }
 
-                updateBox(from, to, subjectIds, grades, compassIds, boxName, box_id);
+                updateBox(from, to, subjectIds, grades, boxName, box_id);
 
             }
 
@@ -135,14 +129,10 @@
                 showIndividualQuestions();
 
                 subjectIds = [];
-                compassIds = [];
 
-                for(i = 0; i < numQuestions; i++) {
+                for(i = 0; i < numQuestions; i++)
                     subjectIds[i] = 'subjectId_' + (i + from);
-                    compassIds[i] = 'compassId_' + (i + from);
-                }
 
-                getCompasses(compassIds);
                 changeLesson($("#lessonId :selected").val(), subjectIds);
             }
 
@@ -154,7 +144,6 @@
                     newElement += "<div style='width: 100%; margin-top: 10px; float: right'>";
                     newElement += "<span>سوال " + (from + i) +  "</span>";
                     newElement += "<select style='margin-right: 10px' id='subjectId_" + (from + i) + "'></select>";
-                    newElement += "<select style='margin-right: 10px' id='compassId_" + (from + i) + "'></select>";
                     newElement += "<select style='margin-right: 10px' id ='grade_" + (from + i) + "'><option value='1'>آسان</option><option value='2'>متوسط</option><option value='3'>دشوار</option></select>";
                     newElement += "<button onclick='getTotalQuestion(" + (from + i) + ")' style='margin-right: 10px'>مشاهده ی تعداد کل سوالات</button>";
                     newElement += "</div>";

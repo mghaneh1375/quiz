@@ -69,8 +69,8 @@
         <div class="col-xs-12">
             <div style='margin-top: 5px;'>
                 <center>
-                    <button id="nxtQ" class="MyBtn" style="width: auto; margin-right: 5px; border: solid 2px #a4712b;" onclick="incQ()">سوال بعدی</button>
                     <button id="backQ" class="MyBtn" style="width: auto; margin-right: 5px; border: solid 2px #a4712b;" onclick="decQ()">سوال قبلی</button>
+                    <button id="nxtQ" class="MyBtn" style="width: auto; margin-right: 5px; border: solid 2px #a4712b;" onclick="incQ()">سوال بعدی</button>
                     <button id="returnToQuiz" class="MyBtn" style="width: auto; margin-right: 5px; border: solid 2px #a4712b;" onclick="SUQ()" hidden>بازگشت به سوالات</button>
                 </center>
             </div>
@@ -182,15 +182,19 @@
             if(mode == "special")
                 return;
 
+            submitAnsFunction(qoqId, answer[qIdx]);
+        }
+
+        function submitAnsFunction(qId, a) {
             $.ajax({
                 type: 'post',
-                url: 'submitAns',
+                url: '{{route('submitAns')}}',
                 data: {
-                    qoqId: qoqId,
-                    newVal: answer[qIdx]
+                    qoqId: qId,
+                    newVal: a
                 },
-                error: function (response) {
-                    alert('Something went wrong' + response.responseText);
+                error: function () {
+                    submitAnsFunction(qId, a);
                 }
             });
         }
@@ -238,7 +242,7 @@
 
             var newNode;
             if(questionArr[qIdx][2] == 0)
-                newNode = "<span><img alt='در حال بارگذاری تصویر' style='max-width: 100%' src='upload/" + questionArr[qIdx][3] + ".jpg'></span><br/>";
+                newNode = "<span><img alt='در حال بارگذاری تصویر' style='max-width: 100%' src='{{URL::asset('upload')}}" + questionArr[qIdx][3] + ".jpg'></span><br/>";
             else
                 newNode = (qIdx + 1) +  " - <span style='background-color: transparent;'>" + questionArr[qIdx][3] +  "</span><br/>";
             $("#BQ").empty().append(newNode);

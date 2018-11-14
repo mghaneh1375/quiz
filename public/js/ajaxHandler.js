@@ -15,7 +15,7 @@ function changeDegree(newDegree, lessonId, subjectIds) {
     });
 }
 
-function changeDegreeWithSelectedLesson(newDegree, lessonId, subjectIds, compassIds, grades, selectedLesson, boxId) {
+function changeDegreeWithSelectedLesson(newDegree, lessonId, subjectIds, grades, selectedLesson, boxId) {
     $.ajax({
         type: 'post',
         url: 'getLessonsByChangingDegreeWithSelectedLesson',
@@ -27,7 +27,7 @@ function changeDegreeWithSelectedLesson(newDegree, lessonId, subjectIds, compass
             document.getElementById(lessonId).innerHTML = response;
 
             if(subjectIds.length > 0) {
-                changeLessonAndBox(document.getElementById(lessonId).value, subjectIds, compassIds, grades, boxId);
+                changeLessonAndBox(document.getElementById(lessonId).value, subjectIds, grades, boxId);
             }
         }
     });
@@ -49,7 +49,7 @@ function changeLesson(newLesson, subjectIds) {
     });
 }
 
-function changeLessonAndBox(newLesson, subjectIds, compassIds, grades, boxId) {
+function changeLessonAndBox(newLesson, subjectIds, grades, boxId) {
     $.ajax({
         type: 'post',
         url: 'getSubjectsByChangingLesson',
@@ -60,7 +60,7 @@ function changeLessonAndBox(newLesson, subjectIds, compassIds, grades, boxId) {
             for(i = 0; i < subjectIds.length; i++) {
                 document.getElementById(subjectIds[i]).innerHTML = response;
             }
-            getBoxItems(boxId, subjectIds, compassIds, grades);
+            getBoxItems(boxId, subjectIds, grades);
         }
     });
 }
@@ -77,7 +77,6 @@ function showBoxItems(boxId, itemId) {
             newElement = "";
             for(i = 0; i < tmp.length; i++) {
                 newElement += "<div class='col-xs-12'><label><span style='margin-left: 5px; margin-right: 5px'> نام مبحث</span><input disabled type='text' value='" + tmp[i].subject_id + "'></label>";
-                newElement += "<label><span style='margin-left: 5px; margin-right: 5px'>نام حیطه </span><input disabled type='text' value='" + tmp[i].compass_id + "'></label>";
                 newElement += "<label><span style='margin-left: 5px; margin-right: 5px'>سطح سختی </span><input type='text' disabled value='" + tmp[i].grade + "'></label></div>";
             }
             document.getElementById(itemId).innerHTML = newElement;
@@ -98,7 +97,7 @@ function deleteSelectedBox(boxId) {
     });
 }
 
-function updateBox(from, to, subjectIds, grades, compassIds, boxName, boxId) {
+function updateBox(from, to, subjectIds, grades, boxName, boxId) {
 
     $.ajax({
         type: 'post',
@@ -108,7 +107,6 @@ function updateBox(from, to, subjectIds, grades, compassIds, boxName, boxId) {
             to : to,
             subjectIds : subjectIds,
             grades : grades,
-            compassIds : compassIds,
             boxName : boxName,
             'box_id' : boxId
         },
@@ -127,7 +125,7 @@ function updateBox(from, to, subjectIds, grades, compassIds, boxName, boxId) {
     });
 }
 
-function addBox(from, to, subjectIds, grades, compassIds, boxName) {
+function addBox(from, to, subjectIds, grades, boxName) {
     $.ajax({
         type: 'post',
         url: 'addNewBox',
@@ -136,7 +134,6 @@ function addBox(from, to, subjectIds, grades, compassIds, boxName) {
             to : to,
             subjectIds : subjectIds,
             grades : grades,
-            compassIds : compassIds,
             boxName : boxName
         },
         success: function (response) {
@@ -154,7 +151,7 @@ function addBox(from, to, subjectIds, grades, compassIds, boxName) {
     });
 }
 
-function getBoxItems(boxId, subjectIds, compassIds, gradeIds) {
+function getBoxItems(boxId, subjectIds, gradeIds) {
 
     $.ajax({
         type: 'post',
@@ -166,7 +163,6 @@ function getBoxItems(boxId, subjectIds, compassIds, gradeIds) {
             tmp = JSON.parse(response);
             for(i = 0; i < tmp.length; i++) {
                 document.getElementById(subjectIds[i]).value = tmp[i].subject_id;
-                document.getElementById(compassIds[i]).value = tmp[i].compass_id;
                 document.getElementById(gradeIds[i]).value = tmp[i].grade;
             }
         }
@@ -203,29 +199,13 @@ function changeQuiz(qId, name, author, numQ, startTime, startDate, endTime, endD
     });
 }
 
-function getCompasses(compassIds) {
-    $.ajax({
-        type: 'post',
-        url: 'getCompasses',
-        success: function (response) {
-
-            for(i = 0; i < compassIds.length; i++) {
-                document.getElementById(compassIds[i]).innerHTML = response;
-            }
-            
-            
-        }
-    });
-}
-
-function getTotalQ(subject_id, compassId, level) {
+function getTotalQ(subject_id, level) {
 
     $.ajax({
         type: 'post',
         url : 'getTotalQ',
         data: {
             'subject_id': subject_id,
-            'compass_id': compassId,
             'level': level
         },
         success: function (response) {

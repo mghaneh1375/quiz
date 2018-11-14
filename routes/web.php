@@ -14,6 +14,7 @@
 //Route::get('alaki', 'HomeController@filterQuestions');
 
 
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 
 Route::post('getQuizLessons', array('as' => 'getQuizLessons', 'uses' => 'AjaxController@getQuizLessons'));
@@ -23,9 +24,22 @@ Route::group(array('middleware' => ['auth', 'levelController:1']), function () {
     Route::any('createTarazTable', ['as' => 'createTarazTable', 'uses' => 'TarazController@createTarazTable']);
 
     Route::any('deleteTarazTable', ['as' => 'deleteTarazTable', 'uses' => 'TarazController@deleteTarazTable']);
+
+    Route::get('groupRegistration', 'HomeController@groupRegistration')->name('groupRegistration');
+
+    Route::post('doGroupRegistry', 'HomeController@doGroupRegistry')->name('doGroupRegistry');
+
+    Route::get('groupRegistrationQuiz', 'QuizController@groupRegistrationQuiz')->name('groupRegistrationQuiz');
+
+    Route::post('doGroupRegistryQuiz', 'QuizController@doGroupRegistryQuiz')->name('doGroupRegistryQuiz');
+
+    Route::get('smsPanel', 'QuizController@smsPanel')->name('smsPanel');
+
+    Route::post('sendSMSToUsers', 'QuizController@sendSMSToUsers')->name('sendSMSToUsers');
+
 });
 
-Route::group(array('middleware' => 'auth|levelController:1'), function () {
+Route::group(array('middleware' => ['auth', 'levelController:1']), function () {
 
     Route::any('defineKarname', 'KarnameController@defineKarname');
 });
@@ -76,6 +90,46 @@ Route::group(array('middleware' => ['auth', 'levelController:1']), function (){
     Route::any('editQuiz={quiz_id}', 'QuizController@editQuiz');
 });
 
+Route::any('callback/{Status?}/{RefID?}',function(){
+
+    $tmp = explode('&', $_SERVER['REQUEST_URI']);
+    $RefID = -1;
+    $Status = "NOK";
+
+    foreach ($tmp as $itr) {
+        $x = explode('=', $itr);
+        if($x[0] == "Authority")
+            $RefID = $x[1];
+        else if($x[0] == "Status")
+            $Status = $x[1];
+    }
+
+    if($RefID != -1) {
+
+        $t = \App\models\Transaction::whereRefId($RefID)->first();
+
+        if ($t != null) {
+
+            if($Status == "OK") {
+
+                $tmp = new \App\models\QEntry();
+                $tmp->u_id = \Illuminate\Support\Facades\Auth::user()->id;
+                $tmp->q_id = $t->additional_id;
+
+                $tmp->save();
+
+                $t->status = "SUCCEED";
+                $t->save();
+
+                return Redirect::route('myQuizes');
+            }
+        }
+
+        return Redirect::route('buyQuiz');
+    }
+
+})->name('callback');
+
 Route::group(array('middleware' => 'auth'), function (){
 
     Route::get('/', array('as' => 'home', 'uses' => 'HomeController@showHome'));
@@ -86,9 +140,15 @@ Route::group(array('middleware' => 'auth'), function (){
 
     Route::get('seeResult/{quiz_id}', array('as' => 'seeResult', 'uses' => 'KarnameController@seeResult'));
 
-    Route::any('doQuiz', 'QuizController@doQuiz');
+    Route::any('doQuiz/{qId?}/{mode?}', 'QuizController@doQuiz')->name('doQuiz');
 
-    Route::post('submitAns', 'AjaxController@submitAns');
+    Route::get('buyQuiz', 'QuizController@buyQuiz')->name('buyQuiz');
+
+    Route::get('myQuizes', 'QuizController@myQuizes')->name('myQuizes');
+
+    Route::get('buySelectedQuiz/{quizId}', 'QuizController@buySelectedQuiz')->name('buySelectedQuiz');
+    
+    Route::post('submitAns', 'AjaxController@submitAns')->name('submitAns');
 
     Route::post('endQuiz', 'AjaxController@endQuiz');
 
@@ -152,6 +212,16 @@ Route::group(array('middleware' => 'auth'), function (){
     Route::get('report3/{quiz_id}/{stateId}', array('as' => 'report3', 'uses' => 'ReportController@report3'));
 
 });
+
+Route::post('getCities', 'HomeController@getCities')->name('getCities');
+
+Route::post('checkNID', 'HomeController@checkNID')->name('checkNID');
+
+Route::post('checkPhoneNum', 'HomeController@checkPhoneNum')->name('checkPhoneNum');
+
+Route::get('registration','HomeController@registration')->name('registration');
+
+Route::post('doRegistration', 'HomeController@doRegistration')->name('doRegistration');
 
 Route::get('login','HomeController@login')->name('login');
 

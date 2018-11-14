@@ -16,13 +16,19 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * An Eloquent Model: 'User'
  *
  * @property integer $id
+ * @property integer $city_id
+ * @property integer $grade_id
  * @property boolean $role
+ * @property boolean $sex_id
  * @property string $username
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $phone_num
+ * @property string $home_phone
+ * @property string $father_name
  * @property string $password
- * @property string $phoneNum
- * @property string $displayN
- * @property integer $cId
  * @method static \Illuminate\Database\Query\Builder|\App\models\User whereUsername($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\models\User wherePhoneNum($value)
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @mixin \Eloquent
@@ -31,8 +37,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable{
 
 	use Notifiable;
-
-//    protected $connection = 'mysql2';
 	/**
 	 * The attributes that are mass assignable.
 	 *
@@ -40,7 +44,7 @@ class User extends Authenticatable{
 	 */
 
 
-	protected $table = 'users';
+	protected $table = 'users_azmoon';
 
 	/**
 	 * The attributes excluded from the model's JSON form.
@@ -78,9 +82,5 @@ class User extends Authenticatable{
 
 	public static function whereId($value) {
 		return User::find($value);
-	}
-
-	public function student() {
-		return $this->hasOne('\App\models\Student', 'id', 'cId');
 	}
 }

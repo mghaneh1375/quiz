@@ -156,40 +156,40 @@
 @section('reminder')
     <center style="margin-top: 100px;" class="row">
         <div class="col-xs-12">
-            <a onclick="showLessonPopUp('{{route('home')}}' + '/questionAnalysis/')" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">گزارش تحلیل سوالات آزمون</button></a>
+            <a onclick="showLessonPopUp('{{route('home')}}' + '/questionAnalysis/')" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">گزارش تحلیل سوالات آزمون</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="showLessonPopUp('{{route('home')}}' + '/questionDiagramAnalysis/')" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">گزارش تحلیل سوالات آزمون با کمک منحنی سوال</button></a>
+            <a onclick="showLessonPopUp('{{route('home')}}' + '/questionDiagramAnalysis/')" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">گزارش تحلیل سوالات آزمون با کمک منحنی سوال</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="showStatePopUp('{{route('home')}}' + '/report1/')" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">گزارشات به تفکیک جنسیت در استان</button></a>
+            <a onclick="showStatePopUp('{{route('home')}}' + '/report1/')" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">گزارشات به تفکیک جنسیت در استان</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="showStatePopUp('{{route('home')}}' + '/report2/')" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">گزارشات تجزیه و تحلیل نمرات دروس به تفکیک جنسیت</button></a>
+            <a onclick="showStatePopUp('{{route('home')}}' + '/report2/')" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">گزارشات تجزیه و تحلیل نمرات دروس به تفکیک جنسیت</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="showCityPopUp('{{route('home')}}' + '/report3/')" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">درصد پاسخ به هر گزینه در هر سوال به تفکیک شهر</button></a>
+            <a onclick="showCityPopUp('{{route('home')}}' + '/report3/')" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">درصد پاسخ به هر گزینه در هر سوال به تفکیک شهر</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A1', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">نمای کلی آزمون</button></a>
+            <a onclick="document.location.href = '{{route('A1', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">نمای کلی آزمون</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A2', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">وضعیت شهر های شرکت کننده</button></a>
+            <a onclick="document.location.href = '{{route('A2', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">وضعیت شهر های شرکت کننده</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('preA3', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">کارنامه تفصیلی دانش آموزان</button></a>
+            <a onclick="document.location.href = '{{route('preA3', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">کارنامه تفصیلی دانش آموزان</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A4', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">پراکندگی درصد شهرها</button></a>
+            <a onclick="document.location.href = '{{route('A4', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">پراکندگی درصد شهرها</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A5', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">کارنامه کلی دانش آموزان</button></a>
+            <a onclick="document.location.href = '{{route('A5', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">کارنامه کلی دانش آموزان</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A6', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">گزارش درس به درس</button></a>
+            <a onclick="document.location.href = '{{route('A6', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">گزارش درس به درس</button></a>
         </div>
         <div class="col-xs-12">
-            <a onclick="document.location.href = '{{route('A7', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="width: auto;" class="MyBtn MyBtn-blue">پراکندگی نمرات هر درس</button></a>
+            <a onclick="document.location.href = '{{route('A7', ['quiz_id' => $qId])}}'" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">پراکندگی نمرات هر درس</button></a>
         </div>
     </center>
 

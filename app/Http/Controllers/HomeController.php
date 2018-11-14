@@ -3,19 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\models\City;
-use App\models\Etehadiye;
-use App\models\Field;
+use App\models\Degree;
 use App\models\QEntry;
 use App\models\QOQ;
 use App\models\ROQ;
-use App\models\Student;
-use App\models\StudentPanel;
+use App\models\State;
 use App\models\User;
-use App\models\UserPanel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
+use PHPExcel;
+use PHPExcel_IOFactory;
 
 class HomeController extends Controller {
 
@@ -25,65 +24,11 @@ class HomeController extends Controller {
 
     public function doLogin() {
 
-        $username = makeValidInput(Input::get('username'));
-        $password = makeValidInput(Input::get('password'));
+        $username = convert(makeValidInput(Input::get('username')));
+        $password = convert(makeValidInput(Input::get('password')));
 
-        $tmp = User::whereUsername($username)->first();
-
-        if($tmp != null > 0 && $tmp->role == 0)
-            $tmp->delete();
-
-        if(User::whereUsername($username)->count() == 0) {
-
-            $tmp = UserPanel::whereUsername($username)->first();
-
-            if ($tmp != null && Hash::check($password, $tmp->password)) {
-                $stdTmp = StudentPanel::whereId($tmp->id);
-                if ($stdTmp != null && Etehadiye::where('NationalID', '=', $stdTmp->IDNumber)->count() > 0) {
-
-                    $field = Field::whereId($stdTmp->field_id);
-
-                    if ($field != null) {
-
-                        $user = new User();
-						$user->id = $tmp->id;
-                        $user->username = $username;
-                        $user->password = Hash::make($password);
-                        $user->role = 0;
-                        $user->cId = $stdTmp->id;
-                        $user->displayN = $stdTmp->first_name . $stdTmp->last_name;
-                        $user->save();
-
-                        if(Student::whereId($stdTmp->id) == null) {
-                            switch ($field->id) {
-                                case 32:
-                                    $degree = 34;
-                                    break;
-                                case 33:
-                                    $degree = 37;
-                                    break;
-                                case 34:
-                                    $degree = 38;
-                                    break;
-
-                                default:
-                                    $degree = 0;
-                                    break;
-                            }
-                            $std = new Student();
-                            $std->id = $stdTmp->id;
-                            $std->degree = $degree;
-                            $std->save();
-                        }
-                    }
-                }
-            }
-        }
-
-
-        if(Auth::attempt(array('username' => $username, 'password' => $password))) {
+        if(Auth::attempt(array('username' => $username, 'password' => $password)))
             return Redirect::intended('/');
-        }
         else {
             $msg = 'نام کاربری و یا پسورد اشتباه است';
             return view('login', array('msg' => $msg));
@@ -95,24 +40,6 @@ class HomeController extends Controller {
         Auth::logout();
         return Redirect::to("login");
     }
-
-//    public function filterQuestions() {
-//
-//        $questions = Question::all();
-//
-//        $target1 = __DIR__ . '/../../public/upload/';
-//        $target2 = __DIR__ . '/../../public/upload1/';
-//
-//        foreach ($questions as $itr) {
-//            $file = MQF::where('qId', '=', $itr->id)->first()->question . '.jpg';
-////            copy(URL::asset('upload/' . $file), URL::asset('upload1/' . $file));
-//            copy($target1 . $file, $target2 . $file);
-//            $file = MSF::where('qId', '=', $itr->id)->first()->solution . '.jpg';
-//            copy($target1 . $file, $target2 . $file);
-////            copy(URL::asset('upload/' . $file), URL::asset('upload1/' . $file));
-//        }
-//
-//    }
 
     private function createTestForQuizes() {
         $qoqIds = QOQ::whereQuizId(12)->take(10)->get();
@@ -137,20 +64,222 @@ class HomeController extends Controller {
         }
     }
 
-    private function fillStudentTable() {
-        $qEntries = QEntry::whereQId(8)->get();
-        $cities = City::all();
-        for($i = 0; $i < count($qEntries); $i++) {
-            $std = new StudentPanel();
-            $std->id = $qEntries[$i]->uId;
-            $rand = rand(0, count($cities) - 1);
-            $std->city_id = $cities[$rand]->id;
-            $std->save();
-        }
-    }
+//    private function fillStudentTable() {
+//        $qEntries = QEntry::whereQId(8)->get();
+//        $cities = City::all();
+//        for($i = 0; $i < count($qEntries); $i++) {
+//            $std = new StudentPanel();
+//            $std->id = $qEntries[$i]->uId;
+//            $rand = rand(0, count($cities) - 1);
+//            $std->city_id = $cities[$rand]->id;
+//            $std->save();
+//        }
+//    }
     
 	public function showHome() {
 //        $this->createTestForQuizes();
         return view('home');
 	}
+
+    public function registration() {
+        return view('registration', ['states' => State::all(), 'degrees' => Degree::orderBy('id', 'ASC')->get()]);
+    }
+
+    public function getCities() {
+
+        if(isset($_POST["stateId"])) {
+
+            echo json_encode(City::whereStateId(makeValidInput($_POST["stateId"]))->get());
+
+        }
+
+    }
+
+    public function doRegistration() {
+
+        if(isset($_POST["first_name"]) && isset($_POST["last_name"]) && isset($_POST["city_id"]) &&
+            isset($_POST["sex_id"]) && isset($_POST["degree"]) && isset($_POST["phone_num"]) &&
+            isset($_POST["nid"]) && isset($_POST["father_name"]) && isset($_POST["home_phone"])
+        ) {
+
+            $sex_id = makeValidInput($_POST["sex_id"]);
+
+            if($sex_id == "none") {
+                echo "nok1";
+                return;
+            }
+
+            $first_name = makeValidInput($_POST["first_name"]);
+            $last_name = makeValidInput($_POST["last_name"]);
+            $father_name = makeValidInput($_POST["father_name"]);
+            $home_phone = makeValidInput($_POST["home_phone"]);
+            $phone_num = convert(makeValidInput($_POST["phone_num"]));
+            $nid = convert(makeValidInput($_POST["nid"]));
+
+            if(empty($first_name) || empty($last_name) || empty($father_name) || empty($home_phone)
+                || empty($phone_num) || empty($nid)) {
+                echo "nok2";
+                return;
+            }
+
+            if(strlen($home_phone) != 8) {
+                echo "nok3";
+                return;
+            }
+
+            if(strlen($phone_num) != 9) {
+                echo "nok4";
+                return;
+            }
+
+            $user = new User();
+            $user->city_id = makeValidInput($_POST["city_id"]);
+            $user->first_name = $first_name;
+            $user->last_name = $last_name;
+            $user->father_name = $father_name;
+            $user->home_phone = $home_phone;
+            $user->password = Hash::make($phone_num);
+            $user->username = $nid;
+            $user->sex_id = $sex_id;
+            $user->grade_id = makeValidInput($_POST["degree"]);
+            $user->phone_num = '09' . $phone_num;
+
+            try {
+                $user->save();
+                sendSMS2('کاربر عزیز!
+ثبت نام شما در سایت آینده سازان با موفقیت انجام گرفت.
+نام کاربری شما کد ملی شما و رمزعبورتان شماره تلفن همراهتان می باشد.', $user->phone_num);
+                echo "ok";
+            }
+            catch (\Exception $x) {
+                echo "nok";
+            }
+
+            return;
+        }
+    }
+
+    public function checkNID() {
+
+        if(isset($_POST["NID"])) {
+
+            $NID = convert(makeValidInput($_POST["NID"]));
+
+            if(!_custom_check_national_code($NID))
+                echo "nok1";
+            else if(User::whereUsername($NID)->count() > 0)
+                echo "nok2";
+            else
+                echo "ok";
+        }
+
+    }
+
+    public function checkPhoneNum() {
+
+        if(isset($_POST["phone_num"])) {
+
+            if(User::wherePhoneNum('09' . convert(makeValidInput($_POST["phone_num"])))->count() > 0)
+                echo "nok";
+            else
+                echo "ok";
+        }
+    }
+
+    public function doGroupRegistry() {
+
+        $err = "";
+
+        if(isset($_FILES["group"])) {
+
+            $file = $_FILES["group"]["name"];
+
+            if(!empty($file)) {
+
+                $path = __DIR__ . '/../../../public/tmp/' . $file;
+
+                $err = uploadCheck($path, "group", "اکسل ثبت نام گروهی", 20000000, "xlsx");
+
+                if (empty($err)) {
+                    upload($path, "group", "اکسل ثبت نام گروهی");
+                    $excelReader = PHPExcel_IOFactory::createReaderForFile($path);
+                    $excelObj = $excelReader->load($path);
+                    $workSheet = $excelObj->getSheet(0);
+                    $users = array();
+                    $lastRow = $workSheet->getHighestRow();
+                    $cols = $workSheet->getHighestColumn();
+
+                    if ($cols < 'G') {
+                        unlink($path);
+                        $err = "تعداد ستون های فایل شما معتبر نمی باشد";
+                    } else {
+                        for ($row = 2; $row <= $lastRow; $row++) {
+
+                            if($workSheet->getCell('A' . $row)->getValue() == "")
+                                break;
+                            $users[$row - 2][0] = $workSheet->getCell('A' . $row)->getValue();
+                            $users[$row - 2][1] = $workSheet->getCell('B' . $row)->getValue();
+                            $users[$row - 2][2] = convert($workSheet->getCell('C' . $row)->getValue());
+                            $users[$row - 2][3] = convert($workSheet->getCell('D' . $row)->getValue());
+                            $users[$row - 2][4] = $workSheet->getCell('E' . $row)->getValue();
+                            $users[$row - 2][5] = $workSheet->getCell('F' . $row)->getValue();
+                            $users[$row - 2][6] = $workSheet->getCell('G' . $row)->getValue();
+                        }
+                        unlink($path);
+                        $err = $this->addUsers($users);
+                    }
+                }
+            }
+        }
+
+        if(empty($err))
+            $err = "لطفا فایل اکسل مورد نیاز را آپلود نمایید";
+
+        return $this->groupRegistration($err);
+    }
+
+    private function addUsers($users) {
+
+        $errs = '';
+        $counter = 2;
+
+        foreach ($users as $user) {
+
+            if(count($user) != 7) {
+                $errs .= '(تعداد ستون نامعتبر) ردیف ' . ($counter++) . '</br/>';
+                continue;
+            }
+
+            if(User::whereUsername($user[2])->count() > 0 || !_custom_check_national_code($user[2])) {
+                $errs .= '(کد ملی تکراری و یا نامعتبر) ردیف ' . ($counter++) . '</br/>';
+                continue;
+            }
+
+            $tmp = new User();
+            $tmp->first_name = $user[0];
+            $tmp->last_name = $user[1];
+            $tmp->username = $user[2];
+            $tmp->password = Hash::make($user[3]);
+            $tmp->phone_num = $user[3];
+            $tmp->sex_id = $user[4];
+            $tmp->grade_id = $user[5];
+            $tmp->city_id = $user[6];
+
+            try {
+                $tmp->save();
+            }
+            catch (\Exception $x) {
+                $errs .= '(خطای 102) ردیف ' . $counter . ' ' . $x->getMessage() . '</br/>';
+            }
+
+            $counter++;
+        }
+
+        return $errs;
+    }
+
+    public function groupRegistration($err = "") {
+        return view('groupRegistration', array('err' => $err));
+    }
+
 }

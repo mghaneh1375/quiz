@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\models\Box;
 use App\models\BoxesOfQuiz;
 use App\models\BoxItems;
-use App\models\Compass;
 use App\models\Degree;
 use App\models\DegreeOfQuiz;
 use App\models\KindKarname;
@@ -15,13 +14,35 @@ use App\models\Quiz;
 use App\models\QuizStatus;
 use App\models\ROQ;
 use App\models\Subject;
+use App\models\Transaction;
+use App\models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use Larabookir\Gateway\Gateway;
+use PHPExcel_IOFactory;
 
 include_once 'Date.php';
 
 class QuizController extends Controller {
+
+    public function sendSMSToUsers() {
+
+        if(isset($_POST["qId"]) && isset($_POST["msg"])) {
+
+            $msg = $_POST["msg"];
+            $qId = makeValidInput($_POST["qId"]);
+            $users = QEntry::whereQId($qId)->get();
+
+            foreach ($users as $itr)
+                sendSMS2($msg, User::whereId($itr->u_id)->phone_num);
+        }
+
+    }
+
+    public function smsPanel() {
+        return view('smsPanel', ['quizes' => Quiz::all()]);
+    }
 
     private function uploadCheck($target_file, $name, $section, $limitSize, $ext) {
         $err = "";
@@ -175,7 +196,7 @@ class QuizController extends Controller {
             $boxId = makeValidInput($_POST["showSelectedBox"]);
             $items = BoxItems::whereBoxId($boxId)->get();
             for($i = 0; $i < count($items); $i++) {
-                $conditions = ["compass_id" => $items[$i]->compass_id, 'grade' => $items[$i]->grade];
+                $conditions = ['grade' => $items[$i]->grade];
                 $questions[$i] = Subject::whereId($items[$i]->subject_id)->questions()->where($conditions)->select('questions.id', 'questions.organization_id')->get();
                 $subject = Subject::whereId($items[$i]->subject_id);
                 if($subject != null)
@@ -186,7 +207,6 @@ class QuizController extends Controller {
                     $items[$i]->grade = 'متوسط';
                 else
                     $items[$i]->grade = 'دشوار';
-                $items[$i]->compass_id = Compass::whereId($items[$i]->compass_id)->name;
             }
 
             $qoq = DB::select('select qoq.id, qoq.quiz_id, qoq.question_id, qoq.qNo from qoq, box WHERE qoq.quiz_id = ' . $quizId . ' and box.id = ' . $boxId . ' and qoq.qNo <= box.to_ and qoq.qNo >= box.from_');
@@ -253,9 +273,20 @@ class QuizController extends Controller {
                     $qIds = array();
                     $qNos = array();
 
+                    $skip = 0;
+                    $oldSubjectId = -1;
+
                     for ($i = 0; $i < count($itemsTmp); $i++) {
-                        $conditions = ['compass_id' => $itemsTmp[$i]->compass_id, 'grade' => $itemsTmp[$i]->grade];
-                        $questionId = Subject::whereId($itemsTmp[$i]->subject_id)->questions()->where($conditions)->select('questions.id')->first();
+
+                        $conditions = ['grade' => $itemsTmp[$i]->grade];
+                        if($oldSubjectId == $itemsTmp[$i]->subject_id)
+                            $skip++;
+                        else
+                            $skip = 0;
+
+                        $oldSubjectId = $itemsTmp[$i]->subject_id;
+
+                        $questionId = Subject::whereId($itemsTmp[$i]->subject_id)->questions()->where($conditions)->skip($skip)->take(1)->select('questions.id')->first();
                         if ($questionId == null) {
                             $msg = "سوالی در جعبه ی مورد نظر قرار نمی گیرد";
                             break;
@@ -283,9 +314,8 @@ class QuizController extends Controller {
                 else
                     $msg = "شماره ی سوال جعبه ها با هم تداخل دارند";
             }
-            else {
+            else
                 $msg = "جعبه ی انتخابی برای آزمون قبلا انتخاب شده است";
-            }
         }
 
         else if(isset($_POST["showQuiz"])) {
@@ -342,6 +372,7 @@ class QuizController extends Controller {
                 'eTime' => convertStringToTime($quiz->eTime),
                 'mark' => $quiz->mark,
                 'minusMark' => $quiz->minusMark,
+                'price' => $quiz->price,
                 'kindQ' => $quiz->kindQ,
                 'error' => '',
                 'quizId' => $quizId,
@@ -359,6 +390,7 @@ class QuizController extends Controller {
             $eDate = makeValidInput($_POST["eDate"]);
             $eTime = makeValidInput($_POST["eTime"]);
             $mark = makeValidInput($_POST["mark"]);
+            $price = makeValidInput($_POST["price"]);
             $minusMark = (isset($_POST["minusMark"])) ? true : false;
             $kindQ = makeValidInput($_POST["kindQ"]);
 
@@ -375,6 +407,7 @@ class QuizController extends Controller {
                         'mark' => $mark,
                         'minusMark' => $minusMark,
                         'kindQ' => $kindQ,
+                        'price' => $price,
                         'error' => $err,
                         'quiz_id' => $quizId,
                         'mode' => 'editInfo'));
@@ -395,6 +428,7 @@ class QuizController extends Controller {
                     'eDate' => $eDate,
                     'eTime' => $eTime,
                     'mark' => $mark,
+                    'price' => $price,
                     'minusMark' => $minusMark,
                     'kindQ' => $kindQ,
                     'error' => $err,
@@ -408,6 +442,7 @@ class QuizController extends Controller {
             $newQuiz->sDate = $sDateTmp;
             $newQuiz->sTime = $sTimeTmp;
             $newQuiz->eDate = $eDateTmp;
+            $newQuiz->price = $price;
             $newQuiz->eTime = $eTimeTmp;
             $newQuiz->mark = $mark;
             $newQuiz->minusMark = $minusMark;
@@ -464,6 +499,7 @@ class QuizController extends Controller {
             $mark = makeValidInput($_POST["mark"]);
             $minusMark = (isset($_POST["minusMark"])) ? true : false;
             $kindQ = makeValidInput($_POST["kindQ"]);
+            $price = makeValidInput($_POST["price"]);
 
             $count = Quiz::where('QN', '=', $qName)->count();
             if ($count > 0) {
@@ -475,6 +511,7 @@ class QuizController extends Controller {
                     'eDate' => $eDate,
                     'eTime' => $eTime,
                     'mark' => $mark,
+                    'price' => $price,
                     'minusMark' => $minusMark,
                     'kindQ' => $kindQ,
                     'error' => $err));
@@ -490,6 +527,7 @@ class QuizController extends Controller {
                 return view('createQuiz', array('qName' => $qName,
                     'timeLen' => $timeLen,
                     'sDate' => $sDate,
+                    'price' => $price,
                     'sTime' => $sTime,
                     'eDate' => $eDate,
                     'eTime' => $eTime,
@@ -509,6 +547,7 @@ class QuizController extends Controller {
             $newQuiz->eDate = $eDateTmp;
             $newQuiz->eTime = $eTimeTmp;
             $newQuiz->mark = $mark;
+            $newQuiz->price = $price;
             $newQuiz->minusMark = $minusMark;
             $newQuiz->kindQ = $kindQ;
             $newQuiz->save();
@@ -519,34 +558,26 @@ class QuizController extends Controller {
             $kindKarname->quiz_id = $qId;
             $kindKarname->lessonAvg = 1;
             $kindKarname->subjectAvg = 1;
-            $kindKarname->compassAvg = 1;
             $kindKarname->lessonStatus = 1;
             $kindKarname->subjectStatus = 1;
-            $kindKarname->compassStatus = 1;
             $kindKarname->lessonMaxPercent = 1;
             $kindKarname->subjectMaxPercent = 1;
-            $kindKarname->compassMaxPercent = 1;
             $kindKarname->partialTaraz = 1;
             $kindKarname->generalTaraz = 1;
             $kindKarname->lessonCityRank = 1;
             $kindKarname->subjectCityRank = 1;
-            $kindKarname->compassCityRank = 1;
             $kindKarname->lessonStateRank = 1;
             $kindKarname->subjectStateRank = 1;
-            $kindKarname->compassStateRank = 1;
             $kindKarname->lessonCountryRank = 1;
             $kindKarname->subjectCountryRank = 1;
-            $kindKarname->compassCountryRank = 1;
             $kindKarname->generalCityRank = 1;
             $kindKarname->generalStateRank = 1;
             $kindKarname->generalCountryRank = 1;
             $kindKarname->coherences = 1;
             $kindKarname->lessonBarChart = 1;
             $kindKarname->subjectBarChart = 1;
-            $kindKarname->compassBarChart = 1;
             $kindKarname->lessonMark = 1;
             $kindKarname->subjectMark = 1;
-            $kindKarname->compassMark = 1;
             $kindKarname->save();
 
             return Redirect::to('addDegreeToQuiz='.$qId);
@@ -559,6 +590,7 @@ class QuizController extends Controller {
             'eDate' => '',
             'eTime' => '09:30',
             'mark' => 0,
+            'price' => 0,
             'minusMark' => true,
             'kindQ' => 1,
             'mode' => 'create',
@@ -599,7 +631,7 @@ class QuizController extends Controller {
 
     private function goToDoQuizPage($msg = "") {
 
-        $degree = Auth::user()->student->degree;
+        $degree = Auth::user()->degree;
 
         if($degree == -1 && Auth::user()->role == 1)
             $quizes = DegreeOfQuiz::select('quiz_id')->get();
@@ -621,34 +653,46 @@ class QuizController extends Controller {
         return view('quizEntry', array('msg' => $msg, 'validQuizes' => $validQuizes));
     }
 
-    public function doQuiz($qId = "") {
+    public function doQuiz($qId = "", $mode = false) {
 
         if(isset($_POST["quiz_id"]) || $qId != "") {
 
             $roqs = array();
 
-            if($qId == "") {
-                $qId = makeValidInput($_POST["quiz_id"]);
+            if($qId == "" || $mode) {
+
+                if($qId == "")
+                    $qId = makeValidInput($_POST["quiz_id"]);
+
                 $uId = Auth::user()->id;
 
-                $condition = ["q_id" => $qId, "u_id" => $uId];
-                $entry = QEntry::where($condition)->select('status', 'timeEntry', 'dateEntry')->get();
+                $entry = QEntry::whereQId($qId)->whereUId($uId)->first();
 
                 $mode = "normal";
                 $tL = Quiz::whereId($qId)->tL;
                 $qInfo = getQOQ($qId, false);
 
-                if($entry == null || count($entry) == 0) {
+                if($entry == null || $entry->timeEntry == null || empty($entry->timeEntry)) {
+
                     $tmp = $this->checkDate($qId);
                     if($tmp != "0" && $tmp != "-1") {
-                        $entry = new QEntry();
-                        $entry->u_id = $uId;
-                        $entry->q_id = $qId;
+
+                        if($entry == null) {
+                            $entry = new QEntry();
+                            $entry->u_id = $uId;
+                            $entry->q_id = $qId;
+                        }
+
                         $date_time = getToday();
                         $entry->timeEntry = time();
                         $entry->dateEntry = $date_time["date"];
                         $entry->status = 0;
-                        $entry->save();
+                        try {
+                            $entry->save();
+                        }
+                        catch (\Exception $x) {
+                            dd($x->getMessage());
+                        }
                         $this->fillROQ($qId);
                         $startTime = time();
                     }
@@ -666,7 +710,6 @@ class QuizController extends Controller {
                             $roqs[$i] = ROQ::where($condition)->select('result')->first()->result;
                         }
                     }
-                    $entry = $entry[0];
                     if($entry->status == 1)
                         return $this->goToDoQuizPage("شما قبلا در این آزمون شرکت کرده اید");
                     $startTime = $entry->timeEntry;
@@ -688,6 +731,235 @@ class QuizController extends Controller {
         }
 
         return $this->goToDoQuizPage();
+
+    }
+
+    public function myQuizes() {
+
+        $today = getToday();
+        $date = $today["date"];
+        $time = $today["time"];
+
+        $uId = Auth::user()->id;
+        $quizes = QEntry::whereUId($uId)->get();
+
+        $selectedQuizes = [];
+        $counter = 0;
+
+        foreach ($quizes as $itr) {
+
+            $quiz = Quiz::whereId($itr->q_id);
+
+            if($quiz == null)
+                continue;
+
+            if(($quiz->sDate < $date && $quiz->eDate > $date) ||
+                ($quiz->sDate < $date && $quiz->eDate >= $date && $quiz->eTime > $time) ||
+                ($quiz->sDate == $date && $quiz->sTime <= $time && (
+                        ($quiz->sDate == $quiz->eDate && $quiz->eTime > $time) ||
+                        ($quiz->sDate != $quiz->eDate) ||
+                        ($quiz->eDate == $date && $quiz->eTime > $time)
+                    )
+                )) {
+
+                $timeLen = $quiz->tL;
+
+                if($itr->timeEntry == "") {
+                    $quiz->quizEntry = 1;
+                }
+                else {
+                    $timeEntry = $itr->timeEntry;
+                    $reminder = $timeLen * 60 - time() + $timeEntry;
+                    if($reminder <= 0)
+                        $quiz->quizEntry = -2;
+                    else
+                        $quiz->quizEntry = 1;
+                }
+            }
+            else if($quiz->sDate > $date ||
+                ($quiz->sDate == $date && $quiz->sTime > $time)) {
+                $quiz->quizEntry = -1;
+            }
+            else {
+                $quiz->quizEntry = -2;
+            }
+
+            $quiz->sDate = convertStringToDate($quiz->sDate);
+            $quiz->eDate = convertStringToDate($quiz->eDate);
+            $quiz->sTime = convertStringToTime($quiz->sTime);
+            $quiz->eTime = convertStringToTime($quiz->eTime);
+            $selectedQuizes[$counter++] = $quiz;
+
+        }
+
+        return view('myQuizes', ['quizes' => $selectedQuizes]);
+
+    }
+
+    public function buyQuiz() {
+
+        $quizes = Quiz::all();
+        $today = getToday();
+        $date = $today["date"];
+        $time = $today["time"];
+
+        $uId = Auth::user()->id;
+        $validQuizes = [];
+        $counter = 0;
+
+        foreach ($quizes as $quiz) {
+            if (($quiz->sDate > $date || $quiz->sDate == $date && $quiz->sTime > $time)) {
+                if(QEntry::whereQId($quiz->id)->whereUId($uId)->count() == 0) {
+                    $quiz->sDate = convertStringToDate($quiz->sDate);
+                    $quiz->eDate = convertStringToDate($quiz->eDate);
+                    $quiz->sTime = convertStringToTime($quiz->sTime);
+                    $quiz->eTime = convertStringToTime($quiz->eTime);
+                    if($quiz->price == 0)
+                        $quiz->price = "رایگان";
+                    else
+                        $quiz->price .= " تومان";
+                    $validQuizes[$counter++] = $quiz;
+                }
+            }
+        }
+
+        return view('buyQuiz', ['quizes' => $validQuizes]);
+    }
+
+    public function buySelectedQuiz($quizId) {
+
+        if(Transaction::whereUserId(Auth::user()->id)->whereAdditionalId($quizId)->whereStatus("SUCCEED")->count() > 0) {
+            dd("شما قبلا این آزمون را خریداری کرده اید");
+        }
+
+        $quiz = Quiz::whereId($quizId);
+        if($quiz != null) {
+
+            if($quiz->price == 0) {
+
+                $tmp = new QEntry();
+                $tmp->u_id = Auth::user()->id;
+                $tmp->q_id = $quizId;
+
+                $tmp->save();
+                return Redirect::route('myQuizes');
+            }
+
+            return $this->doPayment($quizId);
+        }
+
+    }
+
+    private function doPayment($additionalId) {
+
+        try {
+            $gateway = \Gateway::zarinpal();
+            $gateway->setCallback(url('callback'));
+            $price = Quiz::whereId($additionalId)->price * 10;
+
+            $gateway->price($price)->ready($additionalId);
+            return Redirect::to($gateway->redirect());
+
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    public function groupRegistrationQuiz($err = "") {
+
+        $quizes = Quiz::all();
+        $today = getToday();
+        $date = $today["date"];
+        $time = $today["time"];
+
+        $validQuizes = [];
+        $counter = 0;
+
+        foreach ($quizes as $quiz) {
+            if (($quiz->sDate > $date || $quiz->sDate == $date && $quiz->sTime > $time))
+                $validQuizes[$counter++] = $quiz;
+        }
+
+        return view('groupRegistrationQuiz', ['err' => $err,
+            'quizes' => $validQuizes]);
+    }
+
+    public function doGroupRegistryQuiz() {
+
+        $err = "";
+
+        if(isset($_FILES["group"]) && isset($_POST["qId"])) {
+
+            $file = $_FILES["group"]["name"];
+            $qId = makeValidInput($_POST["qId"]);
+
+            if(!empty($file)) {
+
+                $path = __DIR__ . '/../../../public/tmp/' . $file;
+
+                $err = uploadCheck($path, "group", "اکسل ثبت نام گروهی آزمون", 20000000, "xlsx");
+
+                if (empty($err)) {
+                    upload($path, "group", "اکسل ثبت نام گروهی آزمون");
+                    $excelReader = PHPExcel_IOFactory::createReaderForFile($path);
+                    $excelObj = $excelReader->load($path);
+                    $workSheet = $excelObj->getSheet(0);
+                    $users = array();
+                    $lastRow = $workSheet->getHighestRow();
+                    $cols = $workSheet->getHighestColumn();
+
+                    if ($cols < 'A') {
+                        unlink($path);
+                        $err = "تعداد ستون های فایل شما معتبر نمی باشد";
+                    } else {
+                        for ($row = 2; $row <= $lastRow; $row++) {
+
+                            if($workSheet->getCell('A' . $row)->getValue() == "")
+                                break;
+                            $users[$row - 2] = $workSheet->getCell('A' . $row)->getValue();
+                        }
+                        unlink($path);
+                        $err = $this->addUsersToQuiz($users, $qId);
+                    }
+                }
+            }
+        }
+
+        if(empty($err))
+            $err = "لطفا فایل اکسل مورد نیاز را آپلود نمایید";
+
+        return $this->groupRegistrationQuiz($err);
+    }
+
+    private function addUsersToQuiz($users, $qId) {
+
+        $errs = '';
+        $counter = 2;
+
+        foreach ($users as $user) {
+
+            $tmpUser = User::whereUsername($user)->first();
+            if($tmpUser == null) {
+                $errs .= "ردیف " . ($counter++) . "<br/>";
+                continue;
+            }
+
+            $tmp = new QEntry();
+            $tmp->q_id = $qId;
+            $tmp->u_id = $tmpUser->id;
+
+            try {
+                $tmp->save();
+            }
+            catch (\Exception $x) {
+                $errs .= "ردیف " . $counter . " " . $x->getMessage() . "<br/>";
+            }
+
+            $counter++;
+
+        }
+
+        return $errs;
 
     }
 

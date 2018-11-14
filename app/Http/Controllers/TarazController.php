@@ -23,7 +23,6 @@ class TarazController extends Controller {
         $uIds = QEntry::whereQId($quizId)->orderBy('u_id', 'ASC')->select('u_id')->get();
 
         $sIds = DB::select('select DISTINCT questions.subject_id as sId FROM questions, qoq WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
-        $cIds = DB::select('select DISTINCT questions.compass_id as cId FROM questions, qoq WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
 
         $inCorrectsInSubjects = $correctsInSubjects = $inCorrectsInCompasses = $correctsInCompasses = array();
         $counter = 0;
@@ -33,42 +32,28 @@ class TarazController extends Controller {
                 $inCorrectsInSubjects[$counter][$sId->sId] = 0;
                 $correctsInSubjects[$counter][$sId->sId] = 0;
             }
-            foreach ($cIds as $cId) {
-                $inCorrectsInCompasses[$counter][$cId->cId] = 0;
-                $correctsInCompasses[$counter][$cId->cId] = 0;
-            }
             $counter++;
         }
 
-        $qoqs = DB::select('select qoq.id as qoqId, questions.ans as ans, questions.subject_id as sId, questions.compass_id as cId from qoq, questions WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
+        $qoqs = DB::select('select qoq.id as qoqId, questions.ans as ans, questions.subject_id as sId, from qoq, questions WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
         $totals = array();
 
         foreach ($sIds as $sId)
             $totals[$sId->sId] = 0;
 
-        $totalsC = array();
-
-        foreach ($cIds as $cId)
-            $totalsC[$cId->cId] = 0;
-
-
         foreach ($qoqs as $qoq) {
             $roqs = ROQ::whereQoqId($qoq->qoqId)->orderBy('u_id', 'ASC')->select('result', 'u_id')->get();
 
             $totals[$qoq->sId]++;
-            $totalsC[$qoq->cId]++;
             $counter = 0;
 
             foreach ($roqs as $roq) {
 
-                if($qoq->ans == $roq->result) {
+                if($qoq->ans == $roq->result)
                     $correctsInSubjects[$counter][$qoq->sId]++;
-                    $correctsInCompasses[$counter][$qoq->cId]++;
-                }
-                else if($roq->result != 0) {
+
+                else if($roq->result != 0)
                     $inCorrectsInSubjects[$counter][$qoq->sId]++;
-                    $inCorrectsInCompasses[$counter][$qoq->cId]++;
-                }
 
                 $counter++;
             }
@@ -99,26 +84,7 @@ class TarazController extends Controller {
                 }
 
             }
-            foreach ($cIds as $cId) {
-                $compassesPercent = new CompassesPercent();
-                $compassesPercent->q_id = $quizId;
-                $compassesPercent->c_id = $cId->cId;
-                $compassesPercent->u_id = $uId->u_id;
-
-                if($minusMark)
-                    $compassesPercent->percent =
-                        round((3.0 * $correctsInCompasses[$counter][$cId->cId] - $inCorrectsInCompasses[$counter][$cId->cId]) / (3.0 * $totalsC[$cId->cId]), 4) * 100;
-                else
-                    $compassesPercent->percent =
-                        round($correctsInCompasses[$counter][$cId->cId] / $totalsC[$cId->cId], 4) * 100;
-                try {
-                    $compassesPercent->save();
-                }
-                catch (\Exception $x) {
-                    return -1;
-                }
-            }
-
+            
             $counter++;
         }
 
