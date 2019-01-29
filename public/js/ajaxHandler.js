@@ -114,6 +114,9 @@ function updateBox(from, to, subjectIds, grades, boxName, boxId) {
             if(response == -1) {
                 alert("نام جعبه در سیستم موجود است");
             }
+            else if(response == -2) {
+                alert('سوالات بانک از تعداد سوالات انتخابی شما کمتر می باشد');
+            }
             else {
                 alert("جعبه ی مورد نظر با موفقیت ویرایش شد");
                 document.location.href = 'seeBoxes';
@@ -140,6 +143,9 @@ function addBox(from, to, subjectIds, grades, boxName) {
             if(response == -1) {
                 alert("نام جعبه در سیستم موجود است");
             }
+            else if(response == -2) {
+                alert('سوالات بانک از تعداد سوالات انتخابی شما کمتر می باشد');
+            }
             else {
                 alert("جعبه ی مورد نظر با موفقیت ایجاد شد");
                 document.location.href = 'createBox';
@@ -157,7 +163,7 @@ function getBoxItems(boxId, subjectIds, gradeIds) {
         type: 'post',
         url: 'getBoxItems',
         data: {
-            boxId : boxId
+            box_id : boxId
         },
         success: function (response) {
             tmp = JSON.parse(response);
@@ -213,5 +219,4 @@ function getTotalQ(subject_id, level) {
             // $("#" + element).text(response);
         }
     });
-    
 }

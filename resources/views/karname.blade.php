@@ -95,7 +95,6 @@
                                 <select id="kindKarname" name="kindKarname" onchange="changeKindKarname()">
                                     <option value="1">کارنامه ی کلی</option>
                                     <option value="2">کارنامه ی مبحثی</option>
-                                    <option value="4">کارنامه ی حیطه ای</option>
                                     <option value="3">کارنامه ی سوال به سوال</option>
                                 </select>
                             </label>

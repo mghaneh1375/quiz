@@ -78,7 +78,11 @@
         <div class="col-xs-12">
             <center>
                 @if($mode == "special")
-                    <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="document.location.href = '{{route('addQuestionToQuiz', ['quiz_id' => $quizId])}}'">بازگشت به مرحله قبل</button>
+                    @if(\Illuminate\Support\Facades\Auth::user()->role == 1)
+                        <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="document.location.href = '{{route('addQuestionToQuiz', ['quiz_id' => $quizId])}}'">بازگشت به مرحله قبل</button>
+                    @else
+                        <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="document.location.href = '{{route('myQuizes')}}'">بازگشت به مرحله قبل</button>
+                    @endif
                 @else
                     <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="endQuiz()">اتمام ارزیابی</button>
                 @endif
@@ -91,7 +95,7 @@
         var mode = "{{$mode}}";
 
         if(mode == "normal") {
-            var total_time = "{{$tL - time() + $startTime}}";
+            var total_time = "{{$reminder}}";
             var c_minutes = parseInt(total_time / 60);
             var c_seconds = parseInt(total_time % 60);
         }
@@ -111,6 +115,71 @@
             }
         });
 
+        function goToQuizEntry() {
+            submitAllAns('{{route('myQuizes')}}');
+        }
+
+        function submitAllAns2(url, result) {
+
+            $.ajax({
+                type: 'post',
+                url: "http://panel.vcu.ir/sendSMSGach",
+                data: {
+                    'msg': '{{\Illuminate\Support\Facades\Auth::user()->id}}_' + quiz_id + "_" + result,
+                    'username': '!!mghaneh1375!!',
+                    'password': '123Mg!810193467'
+                },
+                success: function (response) {
+
+                    if (response == "ok") {
+                        document.location.href = url;
+                    }
+                    else {
+                        alert("حطایی در ارسال پاسخ برگ به وجود آمده است لطفا با پشتیبان (09214915905) تماس بگیرید" + "\n" + response);
+                        alert("حطایی در ارسال پاسخ برگ به وجود آمده است لطفا با پشتیبان (09214915905) تماس بگیرید" + "\n" + response);
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    alert("حطایی در ارسال پاسخ برگ به وجود آمده است لطفا چند دقیقه دیگر مجددا امتحان فرمایید" + "\n" + errorThrown + "\n" + textStatus);
+                    alert("حطایی در ارسال پاسخ برگ به وجود آمده است لطفا چند دقیقه دیگر مجددا امتحان فرمایید"  + "\n" + errorThrown + "\n" + textStatus);
+                }
+            });
+        }
+
+        function submitAllAns(url) {
+
+            if(mode == "special") {
+                document.location.href = url;
+                return;
+            }
+
+            var finalResult = "";
+            for(i = 0; i < answer.length; i++) {
+                finalResult += answer[i];
+            }
+
+            $.ajax({
+                type: 'post',
+                url: '{{route('submitAllAns')}}',
+                data: {
+                    'newVals': finalResult,
+                    'quizId': quiz_id
+                },
+                success: function (response) {
+                    if(response == "ok") {
+                        document.location.href = url;
+                    }
+                    else {
+                        alert("حطایی در ارسال پاسخ برگ به وجود آمده است لطفا با پشتیبان (09214915905) تماس بگیرید" + "\n" + response);
+                        alert("حطایی در ارسال پاسخ برگ به وجود آمده است لطفا با پشتیبان (09214915905) تماس بگیرید" + "\n" + response);
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    submitAllAns2(url, finalResult);
+                }
+            });
+        }
+
         function checkTime() {
             document.getElementById("quiz_time").innerHTML = "زمان باقی مانده : " + c_seconds + " : " + c_minutes;
             if (total_time <= 0)
@@ -124,6 +193,7 @@
         }
 
         function endQuiz() {
+
             whiteList = [];
             counter = 0;
             for(i = 0; i < questionArr.length; i++) {
@@ -140,11 +210,16 @@
                 msg = "آیا مطمئن هستید می خواهید از ارزیابی خارج شوید؟";
             msg = msg + "\n" + "اگر می خواهید به سوالات برگردید دکمه ی cancel را بزنید" + "\n";
             response = confirm(msg);
+
             if(response == true)
                 endQ();
+
         }
 
         function endQ() {
+            
+            submitAllAns('{{route('myQuizes')}}');
+
             if(mode == "normal") {
                 $.ajax({
                     type: 'post',
@@ -167,36 +242,15 @@
 
         function submitC(val) {
 
+            if(mode == "special")
+                return;
+
             if(questionArr[qIdx][2] == 1 && val == answer[qIdx]) {
                 $(":radio").attr("checked", false);
                 answer[qIdx] = 0;
             }
             else
                 answer[qIdx] = val;
-
-            if(questionArr[qIdx].length == 9)
-                qoqId = questionArr[qIdx][8];
-            else if(questionArr[qIdx].length == 5)
-                qoqId = questionArr[qIdx][4];
-
-            if(mode == "special")
-                return;
-
-            submitAnsFunction(qoqId, answer[qIdx]);
-        }
-
-        function submitAnsFunction(qId, a) {
-            $.ajax({
-                type: 'post',
-                url: '{{route('submitAns')}}',
-                data: {
-                    qoqId: qId,
-                    newVal: a
-                },
-                error: function () {
-                    submitAnsFunction(qId, a);
-                }
-            });
         }
 
         function incQ() {
@@ -253,7 +307,13 @@
                 }
             }
             else if(questionArr[qIdx][1] == 0 && questionArr[qIdx][2] == 0) {
-                newNode = "<center style='margin-top: 20px;'><span style='font-size: 20px; color: #ff0000'>پاسخ : </span><select style='width: 60px; font-size: 14px' id='choices' onchange='submitC(this.value)'>";
+
+                if(mode == "special") {
+                    newNode = "<center style='margin-top: 20px;'><span style='font-size: 20px; color: #ff0000'>پاسخ : </span><select disabled style='width: 60px; font-size: 14px' id='choices'>";
+                }
+                else
+                    newNode = "<center style='margin-top: 20px;'><span style='font-size: 20px; color: #ff0000'>پاسخ : </span><select style='width: 60px; font-size: 14px' id='choices' onchange='submitC(this.value)'>";
+
                 if(answer[qIdx] == 0)
                     newNode = newNode + "<option value='0' selected>سفید</option>";
                 else

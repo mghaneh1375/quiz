@@ -13,6 +13,7 @@ use App\models\QOQ;
 use App\models\Quiz;
 use App\models\QuizStatus;
 use App\models\ROQ;
+use App\models\ROQ2;
 use App\models\Subject;
 use App\models\Transaction;
 use App\models\User;
@@ -615,20 +616,6 @@ class QuizController extends Controller {
         return $quiz->QN;
     }
 
-    private function fillROQ($quizId) {
-        $uId = Auth::user()->id;
-        if($uId != -1) {
-            $qoqIds = QOQ::whereQuizId($quizId)->select('id')->get();
-            for($i = 0; $i < count($qoqIds); $i++) {
-                $roq = new ROQ();
-                $roq->qoq_id = $qoqIds[$i]->id;
-                $roq->result = 0;
-                $roq->u_id = $uId;
-                $roq->save();
-            }
-        }
-    }
-
     private function goToDoQuizPage($msg = "") {
 
         $degree = Auth::user()->degree;
@@ -657,7 +644,7 @@ class QuizController extends Controller {
 
         if(isset($_POST["quiz_id"]) || $qId != "") {
 
-            $roqs = array();
+            $quizTmp = Quiz::whereId($qId);
 
             if($qId == "" || $mode) {
 
@@ -669,23 +656,18 @@ class QuizController extends Controller {
                 $entry = QEntry::whereQId($qId)->whereUId($uId)->first();
 
                 $mode = "normal";
-                $tL = Quiz::whereId($qId)->tL;
-                $qInfo = getQOQ($qId, false);
+                $tL = $quizTmp->tL;
 
-                if($entry == null || $entry->timeEntry == null || empty($entry->timeEntry)) {
+                if($entry == null)
+                    return $this->goToDoQuizPage("شما در آزمون مورد نظر ثبت نام نکرده اید");
+
+                if($entry->timeEntry == null || empty($entry->timeEntry)) {
 
                     $tmp = $this->checkDate($qId);
+                    
                     if($tmp != "0" && $tmp != "-1") {
 
-                        if($entry == null) {
-                            $entry = new QEntry();
-                            $entry->u_id = $uId;
-                            $entry->q_id = $qId;
-                        }
-
-                        $date_time = getToday();
                         $entry->timeEntry = time();
-                        $entry->dateEntry = $date_time["date"];
                         $entry->status = 0;
                         try {
                             $entry->save();
@@ -693,25 +675,45 @@ class QuizController extends Controller {
                         catch (\Exception $x) {
                             dd($x->getMessage());
                         }
-                        $this->fillROQ($qId);
+
+                        $tmpROQ2Str = "";
+                        $qInfo = getQOQ($qId, false);
+
+                        for ($i = 0; $i < count($qInfo); $i++)
+                            $tmpROQ2Str .= "0";
+
+                        $tmpROQ2 = new ROQ2();
+                        $tmpROQ2->u_id = $uId;
+                        $tmpROQ2->quiz_id = $qId;
+                        $tmpROQ2->result = $tmpROQ2Str;
+                        $tmpROQ2->save();
+
+                        $tmpROQ2 = $tmpROQ2Str;
+
+//                        $this->fillROQ($qId);
                         $startTime = time();
                     }
+
                     else if($tmp == "0")
                         return $this->goToDoQuizPage("زمان آزمون مورد نظر به اتمام رسیده است");
+
                     else
                         return $this->goToDoQuizPage("زمان آزمون مورد نظر هنوز فرا نرسیده است");
                 }
+
                 else {
 
-                    $uId = Auth::user()->id;
-                    if ($uId != -1) {
-                        for ($i = 0; $i < count($qInfo); $i++) {
-                            $condition = ['u_id' => $uId, 'qoq_id' => $qInfo[$i][count($qInfo[$i]) - 1]];
-                            $roqs[$i] = ROQ::where($condition)->select('result')->first()->result;
-                        }
-                    }
                     if($entry->status == 1)
                         return $this->goToDoQuizPage("شما قبلا در این آزمون شرکت کرده اید");
+
+                    $qInfo = getQOQ($qId, false);
+                    $tmpROQ2 = ROQ2::whereUId($uId)->whereQuizId($qId)->first()->result;
+
+//                        for ($i = 0; $i < count($qInfo); $i++) {
+//                            $condition = ['u_id' => $uId, 'qoq_id' => $qInfo[$i][count($qInfo[$i]) - 1]];
+//                            $roqs[$i] = ROQ::where($condition)->select('result')->first()->result;
+//                        }
+
                     $startTime = $entry->timeEntry;
                 }
             }
@@ -721,17 +723,79 @@ class QuizController extends Controller {
                 $mode = "special";
                 $qInfo = getQOQ($qId, false);
                 $tL = 0;
+
+                $tmpROQ2 = "";
+
                 for ($i = 0; $i < count($qInfo); $i++) {
-                    $roqs[$i] = 0;
+                    $tmpROQ2 .= "0";
+                }
+//                for ($i = 0; $i < count($qInfo); $i++) {
+//                    $roqs[$i] = 0;
+//                }
+            }
+
+            $roq = [];
+            $counter = 0;
+
+            for($i = 0; $i < strlen($tmpROQ2); $i++) {
+                $roq[$counter++] = $tmpROQ2[$i];
+            }
+
+            $today = getToday();
+
+            $reminder = ($tL * 60 - time() + $startTime);
+
+            if($quizTmp->eDate == $today["date"]) {
+                $tmp = subTimes($quizTmp->eTime, $today['time']);
+                if($reminder > $tmp) {
+                    $reminder = $tmp;
                 }
             }
 
-            return view('quiz', array('quizId' => $qId, 'roqs' => $roqs, 'questions' => $qInfo,
-                'tL' => $tL * 60, 'mode' => $mode, 'startTime' => $startTime));
+            return view('quiz', array('quizId' => $qId, 'roqs' => $roq, 'questions' => $qInfo,
+                'reminder' => $reminder, 'mode' => $mode));
         }
 
         return $this->goToDoQuizPage();
 
+    }
+
+    public function submitAllAns() {
+
+        if(isset($_POST["newVals"]) && isset($_POST["quizId"])) {
+
+            $roq = ROQ2::whereUId(Auth::user()->id)->whereQuizId(makeValidInput($_POST["quizId"]))->first();
+
+            if($roq != null) {
+                $roq->result = makeValidInput($_POST["newVals"]);
+                try {
+                    $roq->save();
+                    echo "ok";
+                }
+                catch (\Exception $x) {
+                    echo $x->getMessage();
+                }
+                return;
+            }
+        }
+
+        echo "nok2";
+    }
+    
+    public function seeQuiz($qId) {
+
+        $mode = "special";
+        $qInfo = getQOQ($qId, false);
+        $counter = 0;
+        $roq = [];
+
+        $tmpROQ2 = ROQ2::whereUId(Auth::user()->id)->whereQuizId($qId)->first()->result;
+
+        for($i = 0; $i < strlen($tmpROQ2); $i++)
+            $roq[$counter++] = $tmpROQ2[$i];
+
+        return view('quiz', array('quizId' => $qId, 'roqs' => $roq, 'questions' => $qInfo,
+            'mode' => $mode, 'reminder' => 0));
     }
 
     public function myQuizes() {
@@ -808,6 +872,7 @@ class QuizController extends Controller {
         $counter = 0;
 
         foreach ($quizes as $quiz) {
+
             if (($quiz->sDate > $date || $quiz->sDate == $date && $quiz->sTime > $time)) {
                 if(QEntry::whereQId($quiz->id)->whereUId($uId)->count() == 0) {
                     $quiz->sDate = convertStringToDate($quiz->sDate);
@@ -962,5 +1027,4 @@ class QuizController extends Controller {
         return $errs;
 
     }
-
 }

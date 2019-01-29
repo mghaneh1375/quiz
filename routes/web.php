@@ -66,16 +66,14 @@ Route::group(array('middleware' => ['auth', 'levelController:1']), function () {
 
 });
 
-Route::group(array('middleware' => ['auth', 'levelController:1']), function () {
+Route::group(array('middleware' => ['auth', 'adminLevel']), function () {
 
     Route::get('createBox', 'BoxController@createBox');
 
     Route::any('seeBoxes', 'BoxController@seeBoxes');
 });
 
-Route::group(array('middleware' => ['auth', 'levelController:1']), function (){
-
-    Route::get('logout', 'HomeController@logout');
+Route::group(array('middleware' => ['auth', 'adminLevel']), function (){
 
     Route::any('createQuiz', 'QuizController@createQuiz');
 
@@ -132,7 +130,11 @@ Route::any('callback/{Status?}/{RefID?}',function(){
 
 Route::group(array('middleware' => 'auth'), function (){
 
+    Route::get('logout', 'HomeController@logout');
+
     Route::get('/', array('as' => 'home', 'uses' => 'HomeController@showHome'));
+
+    Route::post('submitAllAns', ['as' => 'submitAllAns', 'uses' => 'QuizController@submitAllAns']);
 
     Route::get('home','HomeController@showHome');
 
@@ -141,6 +143,8 @@ Route::group(array('middleware' => 'auth'), function (){
     Route::get('seeResult/{quiz_id}', array('as' => 'seeResult', 'uses' => 'KarnameController@seeResult'));
 
     Route::any('doQuiz/{qId?}/{mode?}', 'QuizController@doQuiz')->name('doQuiz');
+
+    Route::get('seeQuiz/{qId?}', 'QuizController@seeQuiz')->name('seeQuiz');
 
     Route::get('buyQuiz', 'QuizController@buyQuiz')->name('buyQuiz');
 
@@ -151,8 +155,11 @@ Route::group(array('middleware' => 'auth'), function (){
     Route::post('submitAns', 'AjaxController@submitAns')->name('submitAns');
 
     Route::post('endQuiz', 'AjaxController@endQuiz');
+});
 
-    Route::post('getCompasses', 'AjaxController@getCompasses');
+Route::group(array('middleware' => ['auth', 'adminLevel']), function (){
+
+    Route::post('deleteQuiz', 'HomeController@deleteQuiz')->name('deleteQuiz');
 
     Route::post('getTotalQ', 'AjaxController@getTotalQ');
 
@@ -165,9 +172,10 @@ Route::group(array('middleware' => 'auth'), function (){
     Route::post('getQuizStates', array('as' => 'getQuizStates', 'uses' => 'AjaxController@getQuizStates'));
 
     Route::post('getQuizCities', array('as' => 'getQuizCities', 'uses' => 'AjaxController@getQuizCities'));
+
 });
 
-Route::group(array('middleware' => 'auth'), function (){
+Route::group(array('middleware' => ['auth', 'adminLevel']), function (){
 
     Route::get('reports/{quiz_id}', array('as' => 'reports', 'uses' => 'ReportController@reports'));
 
@@ -226,5 +234,3 @@ Route::post('doRegistration', 'HomeController@doRegistration')->name('doRegistra
 Route::get('login','HomeController@login')->name('login');
 
 Route::post('login', 'HomeController@doLogin')->name('doLogin');
-
-Route::post('deleteQuiz', 'HomeController@deleteQuiz')->name('deleteQuiz');

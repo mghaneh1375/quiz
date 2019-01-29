@@ -6,7 +6,9 @@ use App\models\City;
 use App\models\Degree;
 use App\models\QEntry;
 use App\models\QOQ;
+use App\models\Quiz;
 use App\models\ROQ;
+use App\models\ROQ2;
 use App\models\State;
 use App\models\User;
 use Illuminate\Support\Facades\Auth;
@@ -80,7 +82,7 @@ class HomeController extends Controller {
 //        $this->createTestForQuizes();
         return view('home');
 	}
-
+    
     public function registration() {
         return view('registration', ['states' => State::all(), 'degrees' => Degree::orderBy('id', 'ASC')->get()]);
     }
@@ -277,7 +279,7 @@ class HomeController extends Controller {
 
         return $errs;
     }
-
+    
     public function groupRegistration($err = "") {
         return view('groupRegistration', array('err' => $err));
     }

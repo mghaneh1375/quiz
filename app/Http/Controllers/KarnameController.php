@@ -90,8 +90,6 @@ class KarnameController extends Controller {
                             $qInfo = getQOQ($quizId, true);
                             return view('questionKarname', array('quizId' => $quizId, 'questions' => $qInfo, 'roqs'
                             => $roqs));
-                        case 4:
-                            return $this->showCompassKarname($uId, $quizId, $kindKarname);
                     }
                 }
             }
@@ -195,7 +193,7 @@ class KarnameController extends Controller {
             $avgs = DB::select('select SUM(percent) / count(*) as avg, MAX(percent) as maxPercent FROM subjects_percent, subjects WHERE q_id = 
 ' . $quizId . ' and subjects.id = s_id and subjects.id_l = ' . $lId . ' GROUP by(s_id)');
         else if($kindKarname->subjectAvg)
-            $avgs = DB::select('select SUM(percent) / count(*) as avg FROM subjects_percent WHERE qId = ' . $quizId . ' and subjects.id = sId and subjects
+            $avgs = DB::select('select SUM(percent) / count(*) as avg FROM subjects_percent, subjects WHERE q_id = ' . $quizId . ' and subjects.id = s_id and subjects
 .id_l = ' . $lId . ' GROUP by(s_id)');
 
         $cityRank = array();

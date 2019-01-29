@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\models\CompassesPercent;
 use App\models\Enheraf;
 use App\models\QEntry;
 use App\models\QOQ;
 use App\models\Quiz;
 use App\models\ROQ;
+use App\models\ROQ2;
 use App\models\SubjectsPercent;
 use App\models\Taraz;
 use Illuminate\Support\Facades\DB;
@@ -24,10 +24,10 @@ class TarazController extends Controller {
 
         $sIds = DB::select('select DISTINCT questions.subject_id as sId FROM questions, qoq WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
 
-        $inCorrectsInSubjects = $correctsInSubjects = $inCorrectsInCompasses = $correctsInCompasses = array();
+        $inCorrectsInSubjects = $correctsInSubjects = array();
         $counter = 0;
 
-        foreach($uIds as $uId) {
+        for($i = 0; $i < count($uIds); $i++) {
             foreach($sIds as $sId) {
                 $inCorrectsInSubjects[$counter][$sId->sId] = 0;
                 $correctsInSubjects[$counter][$sId->sId] = 0;
@@ -35,7 +35,7 @@ class TarazController extends Controller {
             $counter++;
         }
 
-        $qoqs = DB::select('select qoq.id as qoqId, questions.ans as ans, questions.subject_id as sId, from qoq, questions WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
+        $qoqs = DB::select('select qoq.id as qoqId, questions.ans as ans, questions.subject_id as sId from qoq, questions WHERE qoq.quiz_id = ' . $quizId . ' AND qoq.question_id = questions.id');
         $totals = array();
 
         foreach ($sIds as $sId)
@@ -117,27 +117,7 @@ class TarazController extends Controller {
             $quizId = makeValidInput($_POST["quiz_id"]);
             try {
 
-                $notFounded = DB::select('SELECT DISTINCT(roq.u_id) FROM `roq`, qoq WHERE u_id not in (SELECT u_id from qentry WHERE q_id = ' . $quizId . ') and  
-qoq.id and qoq.quiz_id = ' . $quizId);
-
                 include_once 'Date.php';
-
-                foreach ($notFounded as $itr) {
-
-                    try {
-                        $tmp = new QEntry();
-                        $tmp->q_id = $quizId;
-                        $tmp->timeEntry = time();
-                        $tmp->dateEntry = getToday()["date"];
-                        $tmp->status = 1;
-                        $tmp->u_id = $itr->uId;
-                        $tmp->save();
-                    }
-                    catch (\Exception $x) {
-                        dd($x->getMessage());
-                    }
-
-                }
 
                 $this->checkDataQ($quizId);
                 $qEntryIds = QEntry::whereQId($quizId)->select('u_id', 'id')->get();
@@ -152,22 +132,16 @@ qoq.id and qoq.quiz_id = ' . $quizId);
 
                 if($this->fillSubjectsPercentTable($quizId) == -1) {
                     $msg = "مشکلی در ایجاد جدول تراز آزمون ایجاد شده است";
+
+                    $quizes = Quiz::select('id', 'QN')->get();
+                    return view('createTarazTable', array('msg' => $msg, 'mode' => 'create', 'quizes' => $quizes));
+
                 }
 
-                $qoqs = QOQ::whereQuizId($quizId)->get();
+                $this->transferFromROQ2ToROQ($quizId);
 
                 $tmp = array();
                 for ($i = 0; $i < count($qEntryIds); $i++) {
-                    foreach ($qoqs as $qoq) {
-                        $condition = ['u_id' => $qEntryIds[$i]->u_id, 'qoq_id' => $qoq->id];
-                        if(ROQ::where($condition)->count() == 0) {
-                            $roq = new ROQ();
-                            $roq->qoq_id = $qoq->id;
-                            $roq->result = 0;
-                            $roq->u_id = $qEntryIds[$i]->uId;
-                            $roq->save();
-                        }
-                    }
                     $tmp[$i] = $qEntryIds[$i]->id;
                 }
 
@@ -179,11 +153,44 @@ qoq.id and qoq.quiz_id = ' . $quizId);
                     $msg = "زمان آزمون مورد نظر هنوز به اتمام نرسیده است";
                 else if($e->getMessage() == 'duplicate_error')
                     $msg = "جدول تراز برای این آزمون قبلا ساخته شده است";
+
+                dd($e->getMessage());
             }
         }
 
         $quizes = Quiz::select('id', 'QN')->get();
         return view('createTarazTable', array('msg' => $msg, 'mode' => 'create', 'quizes' => $quizes));
+    }
+
+    public function transferFromROQ2ToROQ($quizId) {
+
+        $roq2 = ROQ2::whereQuizId($quizId)->get();
+
+        $condition = ['quiz_id' => $quizId, 'qNo' => 1];
+
+        foreach ($roq2 as $itr) {
+
+            $str = $itr->result;
+
+            for($i = 0; $i < strlen($str); $i++) {
+                $tmp = new ROQ();
+                $tmp->u_id = $itr->u_id;
+                $tmp->result = $str[$i];
+                $condition["qNo"] = $i + 1;
+                $tmp->qoq_id = QOQ::where($condition)->first()->id;
+
+                $tmp->save();
+            }
+
+        }
+
+        DB::delete('DELETE t1 FROM roq t1
+        INNER JOIN
+    roq t2 
+WHERE
+    t1.id < t2.id AND t1.u_id = t2.u_id and t1.qoq_id = t2.qoq_id');
+
+        DB::delete('DELETE from roq2 WHERE quiz_id = ' . $quizId);
     }
 
     public function deleteTarazTable() {
@@ -196,8 +203,6 @@ qoq.id and qoq.quiz_id = ' . $quizId);
             DB::select('delete from taraz where q_entry_id IN (SELECT id from qentry where q_id = ' . $quizId . ')');
             SubjectsPercent::whereQId($quizId)->delete();
             Enheraf::whereQId($quizId)->delete();
-            CompassesPercent::whereQId( $quizId)->delete();
-            
             $msg = "جدول تراز آزمون مورد نظر با موفقیت حذف گردید";
 
         }

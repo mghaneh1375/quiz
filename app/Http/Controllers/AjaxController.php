@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\models\Box;
 use App\models\BoxItems;
-use App\models\Compass;
 use App\models\Degree;
 use App\models\Enheraf;
 use App\models\Lesson;
@@ -66,6 +65,37 @@ class AjaxController extends Controller {
             return;
         }
 
+        $allow = true;
+        $sIds = $selectedGrades = $counter = [];
+
+        for($i = 0; $i < count($subjectIds); $i++) {
+
+            for ($j = 0; $j < count($sIds); $j++) {
+                if ($sIds[$j] == makeValidInput($subjectIds[$i]) &&
+                    $selectedGrades[$j] == makeValidInput($grades[$i])
+                ) {
+                    $counter[$j] = $counter[$j] + 1;
+                    $allow = false;
+                    break;
+                }
+            }
+
+            if($allow) {
+                $sIds[count($sIds)] = makeValidInput($subjectIds[$i]);
+                $selectedGrades[count($selectedGrades)] = makeValidInput($grades[$i]);
+                $counter[count($counter)] = 1;
+            }
+        }
+
+        for($i = 0; $i < count($sIds); $i++) {
+
+            if($this->getTotalQ2($sIds[$i], $selectedGrades[$i]) < $counter[$i]) {
+                echo -2;
+                return;
+            }
+
+        }
+
         $box = new Box();
         $box->from_ = $from;
         $box->to_ = $to;
@@ -98,6 +128,37 @@ class AjaxController extends Controller {
                 echo -1;
                 return;
             }
+        }
+
+        $allow = true;
+        $sIds = $selectedGrades = $counter = [];
+
+        for($i = 0; $i < count($subjectIds); $i++) {
+
+            for ($j = 0; $j < count($sIds); $j++) {
+                if ($sIds[$j] == makeValidInput($subjectIds[$i]) &&
+                    $selectedGrades[$j] == makeValidInput($grades[$i])
+                ) {
+                    $counter[$j] = $counter[$j] + 1;
+                    $allow = false;
+                    break;
+                }
+            }
+
+            if($allow) {
+                $sIds[count($sIds)] = makeValidInput($subjectIds[$i]);
+                $selectedGrades[count($selectedGrades)] = makeValidInput($grades[$i]);
+                $counter[count($counter)] = 1;
+            }
+        }
+
+        for($i = 0; $i < count($sIds); $i++) {
+
+            if($this->getTotalQ2($sIds[$i], $selectedGrades[$i]) < $counter[$i]) {
+                echo -2;
+                return;
+            }
+
         }
 
         $box->from_ = $from;
@@ -147,16 +208,19 @@ class AjaxController extends Controller {
 
     public function getBoxItems() {
 
-        $boxId = makeValidInput($_POST["box_id"]);
-        $boxItems = BoxItems::whereBoxId($boxId)->get();
-        $out = array();
-        $counter = 0;
+        if(isset($_POST["box_id"])) {
 
-        foreach ($boxItems as $boxItem) {
-            $out[$counter++] = $boxItem;
+            $boxId = makeValidInput($_POST["box_id"]);
+            $boxItems = BoxItems::whereBoxId($boxId)->get();
+            $out = array();
+            $counter = 0;
+
+            foreach ($boxItems as $boxItem) {
+                $out[$counter++] = $boxItem;
+            }
+
+            echo json_encode($out);
         }
-
-        echo json_encode($out);
     }
 
     public function changeQuiz() {
@@ -299,6 +363,13 @@ city.id and city.state_id = state.id'));
         $condition = ['subject_id' => $subjectId, 'grade' => $level];
 
         echo Question::where($condition)->count();
+
+    }
+
+    private function getTotalQ2($subjectId, $level) {
+
+        $condition = ['subject_id' => $subjectId, 'grade' => $level];
+        return Question::where($condition)->count();
 
     }
 }

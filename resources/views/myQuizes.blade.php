@@ -29,7 +29,7 @@
                         @if($itr->quizEntry == 1)
                             <td><center><button class="MyBtn MyBtn-yellow" onclick="redirect('{{route('doQuiz', ['quizId' => $itr->id, 'mode' => true])}}')">ورود به آزمون</button></center></td>
                         @elseif($itr->quizEntry == -2)
-                            <td><center><button class="MyBtn MyBtn-yellow" onclick="redirect('{{route('buySelectedQuiz', ['quizId' => $itr->id])}}')">مرور آزمون</button></center></td>
+                            <td><center><button class="MyBtn MyBtn-yellow" onclick="redirect2('{{route('seeQuiz', ['quizId' => $itr->id])}}')">مرور آزمون</button></center></td>
                         @else
                             <td><center>زمان آزمون هنوز فرا نرسیده است</center></td>
                         @endif
@@ -59,6 +59,10 @@
             $("#redirector").attr('href', url);
             $('.dark').removeClass('hidden');
             $('#notice').removeClass('hidden');
+        }
+
+        function redirect2(url) {
+            document.location.href = url;
         }
 
     </script>

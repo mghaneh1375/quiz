@@ -28,35 +28,43 @@
                 @foreach($boxes as $box)
                     <div class="col-xs-12" style="margin-top: 10px">
 
-                        <label style="float: right; margin-right: 5px">
-                            <span>نام جعبه</span>
-                            <input type="text" disabled value="{{$box->name}}">
-                        </label>
-
-                        <label style="margin-right: 5px; float: right">
-                            <span>از: </span>
-                            <input type="text" disabled value="{{$box->from_}}">
-                        </label>
-
-                        <label style="float: right; margin-right: 5px">
-                            <span>تا: </span>
-                            <input type="text" disabled value="{{$box->to_}}">
-                        </label>
-
-                        <button style="margin-right: 15px; float: right" class="btn btn-success" onclick="showBoxItems('{{$box->id}}', 'items')" data-toggle="tooltip" title="نمایش آیتم ها">
-                            <span style="margin-left: 10%" class="glyphicon glyphicon-th-list"></span>
-                        </button>
-
-                        <button style="float: right; margin-right: 5px" class="btn btn-danger" onclick="deleteSelectedBox('{{$box->id}}')" data-toggle="tooltip" title="حذف جعبه">
-                            <span style="margin-left: 10%" class="glyphicon glyphicon-remove"></span>
-                        </button>
-
-                        <form style="float: right" method="post" action="{{URL('seeBoxes')}}">
-                            {{csrf_field()}}
-                            <button style="margin-right: 5px" class="btn btn-info" name="editSelectedBox" value="{{$box->id}}" data-toggle="tooltip" title="ویرایش آیتم ها">
-                                <span style="margin-left: 10%" class="glyphicon glyphicon-edit"></span>
+                        <div class="col-xs-4">
+                            <button style="margin-right: 15px; float: right" class="btn btn-success" onclick="showBoxItems('{{$box->id}}', 'items')" data-toggle="tooltip" title="نمایش آیتم ها">
+                                <span style="margin-left: 10%" class="glyphicon glyphicon-th-list"></span>
                             </button>
-                        </form>
+
+                            <button style="float: right; margin-right: 5px" class="btn btn-danger" onclick="deleteSelectedBox('{{$box->id}}')" data-toggle="tooltip" title="حذف جعبه">
+                                <span style="margin-left: 10%" class="glyphicon glyphicon-remove"></span>
+                            </button>
+
+                            <form style="float: right" method="post" action="{{URL('seeBoxes')}}">
+                                {{csrf_field()}}
+                                <button style="margin-right: 5px" class="btn btn-info" name="editSelectedBox" value="{{$box->id}}" data-toggle="tooltip" title="ویرایش آیتم ها">
+                                    <span style="margin-left: 10%" class="glyphicon glyphicon-edit"></span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-xs-2">
+                            <label style="float: right; margin-right: 5px">
+                                <span>تا: </span>
+                                <input style="width: 50px; min-width: 50px" type="text" disabled value="{{$box->to_}}">
+                            </label>
+                        </div>
+
+                        <div class="col-xs-2">
+                            <label style="margin-right: 5px; float: right">
+                                <span>از: </span>
+                                <input style="width: 50px; min-width: 50px" type="text" disabled value="{{$box->from_}}">
+                            </label>
+                        </div>
+
+                        <div class="col-xs-4">
+                            <label style="float: right; margin-right: 5px">
+                                <span>نام جعبه</span>
+                                <input style="width: 150px; min-width: 150px" type="text" disabled value="{{$box->name}}">
+                            </label>
+                        </div>
                     </div>
                 @endforeach
             </div>
