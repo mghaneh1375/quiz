@@ -38,6 +38,8 @@
 
         <div class="line"></div>
 
+        <div style="margin: 10px"><span>تعداد رکورد های پیدا شده:</span><span>&nbsp;</span><span id="records"></span></div>
+
         <div style="overflow-x: auto">
 
             <div class="filter">
@@ -106,6 +108,8 @@
                     if(response.length > 0) {
 
                         response = JSON.parse(response);
+
+                        $("#records").empty().append(response.length);
 
                         newElement = "";
 

@@ -231,10 +231,15 @@ Route::post('checkNID', 'HomeController@checkNID')->name('checkNID');
 
 Route::post('checkPhoneNum', 'HomeController@checkPhoneNum')->name('checkPhoneNum');
 
-Route::get('registration','HomeController@registration')->name('registration');
 
-Route::post('doRegistration', 'HomeController@doRegistration')->name('doRegistration');
+Route::group(array('middleware' => ['notLogin']), function () {
 
-Route::get('login','HomeController@login')->name('login');
+    Route::get('registration', 'HomeController@registration')->name('registration');
 
-Route::post('login', 'HomeController@doLogin')->name('doLogin');
+    Route::post('doRegistration', 'HomeController@doRegistration')->name('doRegistration');
+
+    Route::get('login', 'HomeController@login')->name('login');
+
+    Route::post('login', 'HomeController@doLogin')->name('doLogin');
+
+});

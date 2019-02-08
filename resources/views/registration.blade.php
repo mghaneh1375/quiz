@@ -10,18 +10,34 @@
 
     <title>ورود</title>
 
+    <style>
+
+        .popup {
+            position: absolute;
+            width: 30%;
+            height: 150px;
+            background-color: white;
+            top: 30%;
+            right: 40%;
+            left: auto;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            color: rgb(22,160,133);
+        }
+
+    </style>
+
 </head>
 
 <body class="main">
 
-<div class="container">
+<div id="body" class="container">
+
+    <div class="dark hidden" style="position: absolute; left: 0; top: 0; z-index: 10000; width: 100%; height: 100%; background-color: rgba(120, 119, 120, 0.62)"></div>
 
     <center>
 
         <h3 class="title">
-
             ورود
-
         </h3>
 
     </center>
@@ -210,6 +226,14 @@
         <input type="password" required id="passwordLogin" name="password">
     </form>
 
+    <div class="popup hidden" id="popup">
+        <div style="padding: 40px; direction: rtl; width: fit-content; margin: 0 auto; text-align: center">
+            <p>ثبت نام شما با موفقیت انجام شد.</p>
+            <p>نام کاربری شما کد ملی شما و رمزعبورتان شماره تلفن همراهتان می باشد.</p>
+            <button onclick="redirect()">تایید</button>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -257,7 +281,7 @@
                 if(response == "nok1")
                     $("#err").empty().append('کد ملی وارد شده معتبر نمی باشد');
                 else if(response == "nok2")
-                    $("#err").empty().append('کد ملی وارد شده در سامانه موحود است');
+                    $("#err").empty().append('کد ملی وارد شده در سامانه موجود است');
                 else
                     checkPhoneNum();
             }
@@ -323,9 +347,8 @@
             success: function (response) {
 
                 if(response == "ok") {
-                    $("#usernameLogin").val($("#nid").val());
-                    $("#passwordLogin").val($("#phone_num").val());
-                    $("#loginForm").submit();
+                    $(".dark").removeClass('hidden');
+                    $("#popup").removeClass('hidden');
                 }
                 else if(response == "nok1")
                     $("#err").empty().append('لطفا جنسیت خود را مشخص کنید');
@@ -341,6 +364,12 @@
 
         });
         
+    }
+
+    function redirect() {
+        $("#usernameLogin").val($("#nid").val());
+        $("#passwordLogin").val($("#phone_num").val());
+        $("#loginForm").submit();
     }
 
 </script>
