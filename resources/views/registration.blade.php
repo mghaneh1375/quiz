@@ -13,6 +13,7 @@
     <style>
 
         .popup {
+            z-index: 10000000;
             position: absolute;
             width: 30%;
             height: 150px;
@@ -347,7 +348,8 @@
             success: function (response) {
 
                 if(response == "ok") {
-                    $(".dark").removeClass('hidden');
+                    window.scrollTo(0, 0);
+                    $(".dark").css('height', window.innerHeight).removeClass('hidden');
                     $("#popup").removeClass('hidden');
                 }
                 else if(response == "nok1")
@@ -368,7 +370,7 @@
 
     function redirect() {
         $("#usernameLogin").val($("#nid").val());
-        $("#passwordLogin").val($("#phone_num").val());
+        $("#passwordLogin").val("09" + $("#phone_num").val());
         $("#loginForm").submit();
     }
 

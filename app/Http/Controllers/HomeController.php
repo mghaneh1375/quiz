@@ -143,6 +143,8 @@ class HomeController extends Controller {
                 return;
             }
 
+            $phone_num = '09' . $phone_num;
+
             $user = new User();
             $user->city_id = makeValidInput($_POST["city_id"]);
             $user->first_name = $first_name;
@@ -153,7 +155,7 @@ class HomeController extends Controller {
             $user->username = $nid;
             $user->sex_id = $sex_id;
             $user->grade_id = makeValidInput($_POST["degree"]);
-            $user->phone_num = '09' . $phone_num;
+            $user->phone_num = $phone_num;
             $user->subscription = $subscription;
 
             try {
