@@ -314,7 +314,7 @@
                 'city_id': $("#cities").val(),
                 'nid': $("#nid").val(),
                 'sex_id': sex,
-                'home_phone': homePhone,
+                'home_phone': ($("#prePhoneCode").val() + "" + homePhone),
                 'degree': $("#degree").val(),
                 'subscription': subscription,
                 'father_name': $("#father_name").val(),

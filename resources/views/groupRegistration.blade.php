@@ -45,7 +45,7 @@
             <h4 class="blink">لطفا فایل اکسل زیر را دانلود کرده و آن را به دقت پر نمایید و سپس آن را آپلود نمایید.</h4>
 
             <div style="margin-top: 40px">
-                <div style="width: 200px" class="btn btn-warning"><a target="_blank" href="{{URL::asset('nemone_form.xlsx')}}" download>دریافت نمونه فایل اکسل</a></div>
+                <div style="width: 200px" class="btn btn-warning"><a target="_blank" href="{{URL::asset('form1.xlsx')}}" download>دریافت نمونه فایل اکسل</a></div>
             </div>
 
             <div style="margin-top: 10px">

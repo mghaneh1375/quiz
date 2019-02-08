@@ -132,7 +132,8 @@ class HomeController extends Controller {
                 return;
             }
 
-            if(strlen($home_phone) != 8) {
+
+            if(strlen($home_phone) > 12) {
                 echo "nok3";
                 return;
             }
@@ -235,6 +236,9 @@ class HomeController extends Controller {
                             $users[$row - 2][4] = $workSheet->getCell('E' . $row)->getValue();
                             $users[$row - 2][5] = $workSheet->getCell('F' . $row)->getValue();
                             $users[$row - 2][6] = $workSheet->getCell('G' . $row)->getValue();
+                            $users[$row - 2][7] = $workSheet->getCell('H' . $row)->getValue();
+                            $users[$row - 2][8] = $workSheet->getCell('I' . $row)->getValue();
+                            $users[$row - 2][9] = $workSheet->getCell('J' . $row)->getValue();
                         }
                         unlink($path);
                         $err = $this->addUsers($users);
@@ -256,7 +260,7 @@ class HomeController extends Controller {
 
         foreach ($users as $user) {
 
-            if(count($user) != 7) {
+            if(count($user) < 7) {
                 $errs .= '(تعداد ستون نامعتبر) ردیف ' . ($counter++) . '</br/>';
                 continue;
             }
@@ -275,6 +279,14 @@ class HomeController extends Controller {
             $tmp->sex_id = $user[4];
             $tmp->grade_id = $user[5];
             $tmp->city_id = $user[6];
+            if($user[7] != null && !empty($user[7]))
+                $tmp->father_name = $user[7];
+
+            if($user[8] != null && !empty($user[8]))
+                $tmp->home_phone = $user[8];
+
+            if($user[9] != null && !empty($user[9]))
+                $tmp->subscription = $user[9];
 
             try {
                 $tmp->save();
