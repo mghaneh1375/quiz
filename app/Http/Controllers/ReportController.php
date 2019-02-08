@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\models\Degree;
 use App\models\KindKarname;
 use App\models\Lesson;
 use App\models\QEntry;
@@ -9,6 +10,7 @@ use App\models\QOQ;
 use App\models\Question;
 use App\models\Quiz;
 use App\models\ROQ;
+use App\models\State;
 use App\models\Taraz;
 use App\models\User;
 use Illuminate\Support\Facades\DB;
@@ -1390,5 +1392,57 @@ as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
         $class = new KarnameController();
 
         return $class->showGeneralKarname($uId, $quizId, $qEntryId, KindKarname::where('quiz_id', '=', $quizId)->first());
+    }
+
+    public function showRegistrationReport() {
+        return view('registrationReport', ['grades' => Degree::orderBy('dN', 'ASC')->get(), 'states' => State::orderBy('name', 'ASC')->get()]);
+    }
+
+    public function fetchStudents() {
+
+        if(isset($_POST["state"]) && isset($_POST["grade"]) && isset($_POST["subscription"])) {
+
+            $state = makeValidInput($_POST["state"]);
+            $grade = makeValidInput($_POST["grade"]);
+            $subscription = makeValidInput($_POST["subscription"]);
+
+            $whereClause = "c.id = u.city_id and d.id = u.grade_id and role = 0 ";
+
+            if($state != -1)
+                $whereClause .= 'and c.state_id = ' . $state . ' ';
+
+            if($grade != -1)
+                $whereClause .= 'and u.grade_id = ' . $grade . ' ';
+
+            if($subscription != -1)
+                $whereClause .= 'and u.subscription = ' . $subscription;
+
+
+            $users = DB::select('select concat(u.first_name, " ", u.last_name) as name, u.phone_num, d.dN as grade, c.name as city, u.username, u.subscription ' .
+                'from users_azmoon u, cities c, degree d where ' . $whereClause
+            );
+
+            foreach ($users as $user) {
+
+                switch ($user->subscription) {
+                    case 1:
+                        $user->subscription = 'قرارگاه ملی جدید';
+                        break;
+                    case 2:
+                        $user->subscription = 'قرارگاه ملی قدیم';
+                        break;
+                    case 3:
+                        $user->subscription = 'قرارگاه استانی';
+                        break;
+                    default:
+                        $user->subscription = 'سایر';
+                        break;
+                }
+
+            }
+
+            echo json_encode($users);
+        }
+
     }
 }

@@ -144,7 +144,7 @@
 
                     <label>
 
-                        <span class="label-span">مقطع تحصیلی</span>
+                        <span class="label-span">پایه تحصیلی</span>
 
                         <select id="degree">
                             @foreach($degrees as $degree)
@@ -166,6 +166,24 @@
                             <option value="none">انتخاب کنید</option>
                             <option value="0">دختر</option>
                             <option value="1">پسر</option>
+                        </select>
+
+                    </label>
+
+                </div>
+
+                <div class="col-xs-12">
+
+                    <label>
+
+                        <span class="label-span">نوع عضویت</span>
+
+                        <select id="subscription">
+                            <option value="none">انتخاب کنید</option>
+                            <option value="1">عضو قرارگاه ملی جدید هستم(سال تحصیلی 98-97)</option>
+                            <option value="2">عضو قرارگاه ملی قدیم هستم(سال تحصیلی 97-96)</option>
+                            <option value="3">عضو قرارگاه استانی سال تحصیلی 98-97 هستم</option>
+                            <option value="4">سایر</option>
                         </select>
 
                     </label>
@@ -272,6 +290,12 @@
             return;
         }
 
+        var subscription = $("#subscription").val();
+        if(subscription == "none") {
+            $("#err").empty().append('لطفا نوع عضویت خود را مشخص کنید');
+            return;
+        }
+
         var homePhone = $("#home_phone").val();
         if(homePhone.length != 8) {
             $("#err").empty().append('تلفن منزل معتبر نمی باشد');
@@ -292,6 +316,7 @@
                 'sex_id': sex,
                 'home_phone': homePhone,
                 'degree': $("#degree").val(),
+                'subscription': subscription,
                 'father_name': $("#father_name").val(),
                 'phone_num': $("#phone_num").val()
             },

@@ -18,6 +18,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property integer $id
  * @property integer $city_id
  * @property integer $grade_id
+ * @property integer $subscription
  * @property boolean $role
  * @property boolean $sex_id
  * @property string $username

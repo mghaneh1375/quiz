@@ -84,7 +84,7 @@ class HomeController extends Controller {
 	}
     
     public function registration() {
-        return view('registration', ['states' => State::all(), 'degrees' => Degree::orderBy('id', 'ASC')->get()]);
+        return view('registration', ['states' => State::orderBy('name', 'ASC')->get(), 'degrees' => Degree::orderBy('id', 'ASC')->get()]);
     }
 
     public function getCities() {
@@ -101,12 +101,20 @@ class HomeController extends Controller {
 
         if(isset($_POST["first_name"]) && isset($_POST["last_name"]) && isset($_POST["city_id"]) &&
             isset($_POST["sex_id"]) && isset($_POST["degree"]) && isset($_POST["phone_num"]) &&
-            isset($_POST["nid"]) && isset($_POST["father_name"]) && isset($_POST["home_phone"])
+            isset($_POST["nid"]) && isset($_POST["father_name"]) && isset($_POST["home_phone"]) &&
+            isset($_POST["subscription"])
         ) {
 
             $sex_id = makeValidInput($_POST["sex_id"]);
 
             if($sex_id == "none") {
+                echo "nok1";
+                return;
+            }
+
+            $subscription = makeValidInput($_POST["subscription"]);
+
+            if($subscription == "none") {
                 echo "nok1";
                 return;
             }
@@ -145,10 +153,11 @@ class HomeController extends Controller {
             $user->sex_id = $sex_id;
             $user->grade_id = makeValidInput($_POST["degree"]);
             $user->phone_num = '09' . $phone_num;
+            $user->subscription = $subscription;
 
             try {
                 $user->save();
-                sendSMS2('کاربر عزیز!
+                sms('کاربر عزیز!
 ثبت نام شما در سایت آینده سازان با موفقیت انجام گرفت.
 نام کاربری شما کد ملی شما و رمزعبورتان شماره تلفن همراهتان می باشد.', $user->phone_num);
                 echo "ok";
