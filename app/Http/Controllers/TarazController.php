@@ -122,23 +122,19 @@ class TarazController extends Controller {
                 $this->checkDataQ($quizId);
                 $qEntryIds = QEntry::whereQId($quizId)->select('u_id', 'id')->get();
 
+                $this->transferFromROQ2ToROQ($quizId);
+
                 $avgs = $this->getAverageLessons($quizId, $qEntryIds);
 
-
-                for ($i = 0; $i < count($avgs); $i++) {
+                for ($i = 0; $i < count($avgs); $i++)
                     $this->getEnherafMeyar($avgs[$i][0], $avgs[$i][1], $quizId);
-                }
-
 
                 if($this->fillSubjectsPercentTable($quizId) == -1) {
                     $msg = "مشکلی در ایجاد جدول تراز آزمون ایجاد شده است";
 
                     $quizes = Quiz::select('id', 'QN')->get();
                     return view('createTarazTable', array('msg' => $msg, 'mode' => 'create', 'quizes' => $quizes));
-
                 }
-
-                $this->transferFromROQ2ToROQ($quizId);
 
                 $tmp = array();
                 for ($i = 0; $i < count($qEntryIds); $i++) {
