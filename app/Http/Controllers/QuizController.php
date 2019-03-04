@@ -36,7 +36,7 @@ class QuizController extends Controller {
             $users = QEntry::whereQId($qId)->get();
 
             foreach ($users as $itr)
-                sendSMS2($msg, User::whereId($itr->u_id)->phone_num);
+                sms($msg, User::whereId($itr->u_id)->phone_num);
         }
 
     }

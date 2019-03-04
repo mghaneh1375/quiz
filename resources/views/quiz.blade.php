@@ -32,28 +32,28 @@
         }
 
         @-webkit-keyframes lower2 {
-            0%,16%,23.999%,27%,31.999%,37%,44.999%,47%,53.999%,86.999%,94%,100% {
-                opacity:0.99; text-shadow: 0 0 80px red,0 0 30px FireBrick,0 0 6px DarkRed;
+            0%,37%,67%,83%,100% {
+                opacity:0.99; text-shadow: 0 0 15px red,0 0 10px FireBrick,0 0 6px DarkRed;
             }
-            23%,24.99%,31%,39.999%,45%,45.999%,50%,73.999%,88%,97.999% {
+            23%,45%,90% {
                 opacity:0.4; text-shadow: none;
             }
         }
 
         @-o-keyframes lower2 {
-            0%,16%,23.999%,27%,31.999%,37%,44.999%,47%,53.999%,86.999%,94%,100% {
-                opacity:0.99; text-shadow: 0 0 80px red,0 0 30px FireBrick,0 0 6px DarkRed;
+            0%,37%,67%,83%,100% {
+                opacity:0.99; text-shadow: 0 0 15px red,0 0 10px FireBrick,0 0 6px DarkRed;
             }
-            23%,24.99%,31%,39.999%,45%,45.999%,50%,73.999%,88%,97.999% {
+            23%,45%,90% {
                 opacity:0.4; text-shadow: none;
             }
         }
 
         @-moz-keyframes lower2 {
-            0%,16%,23.999%,27%,31.999%,37%,44.999%,47%,53.999%,86.999%,94%,100% {
-                opacity:0.99; text-shadow: 0 0 80px red,0 0 30px FireBrick,0 0 6px DarkRed;
+            0%,37%,67%,83%,100% {
+                opacity:0.99; text-shadow: 0 0 15px red,0 0 10px FireBrick,0 0 6px DarkRed;
             }
-            23%,24.99%,31%,39.999%,45%,45.999%,50%,73.999%,88%,97.999% {
+            23%,45%,90% {
                 opacity:0.4; text-shadow: none;
             }
         }
@@ -180,17 +180,15 @@
 
             $.ajax({
                 type: 'post',
-                url: "http://panel.vcu.ir/sendSMSGach",
+                url: "http://panel.vcu.ir/sendSMSAyandehsazan",
                 data: {
                     'msg': '{{\Illuminate\Support\Facades\Auth::user()->id}}_' + quiz_id + "_" + result,
                     'username': '!!mghaneh1375!!',
                     'password': '123Mg!810193467'
                 },
                 success: function (response) {
-
-                    if (response == "ok") {
+                    if (response == "ok")
                         document.location.href = url;
-                    }
                     else {
                         alert("حطایی در ارسال پاسخ برگ به وجود آمده است لطفا با پشتیبان (09214915905) تماس بگیرید" + "\n" + response);
                         alert("حطایی در ارسال پاسخ برگ به وجود آمده است لطفا با پشتیبان (09214915905) تماس بگیرید" + "\n" + response);
