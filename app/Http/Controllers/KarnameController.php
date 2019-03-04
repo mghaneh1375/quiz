@@ -216,7 +216,7 @@ subjects_percent WHERE std.id = subjects_percent.u_id and std.city_id = ' . $cit
             $counter = 0;
             $stateId = City::whereId($cityId)->state->id;
             foreach ($subjects as $subject) {
-                $tmp = DB::select('SELECT subjects_percent.u_id, subjects_percent.percent as taraz from users_azmoon std, cities ci, subjects_percent WHERE std.id = subjects_percent.u_id and std.city_id = ci.id and ci.state_id = ' . $stateId . ' and subjects_percent.q_id = ' . $quizId . ' and subjects_percent.sId = ' . $subject->id . ' ORDER by subjects_percent.percent DESC');
+                $tmp = DB::select('SELECT subjects_percent.u_id, subjects_percent.percent as taraz from users_azmoon std, cities ci, subjects_percent WHERE std.id = subjects_percent.u_id and std.city_id = ci.id and ci.state_id = ' . $stateId . ' and subjects_percent.q_id = ' . $quizId . ' and subjects_percent.s_id = ' . $subject->id . ' ORDER by subjects_percent.percent DESC');
                 $stateRank[$counter++] = $this->getRank($tmp, $uId);
             }
         }

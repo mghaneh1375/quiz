@@ -19,7 +19,10 @@
         <center style='margin-top: 20px;'><a href="{{URL('home')}}"><input type='submit' value='تایید'></a></center>
     </div>
 
-    <div class="row" id="reminder" style="margin-top: 130px">
+    <div class="row" id="reminder" style="margin-top: 40px">
+        <div>
+            <h4 style="line-height: 1.5; color: red">توجه: دانش آموز عزیز برای ثبت پاسخ های داده شده خود در سامانه پس از پاسخ گویی کامل به آزمون حتما بر روی دکمه اتمام ارزیابی کلیک نمایید در غیر این صورت پاسخ نامه شما ثبت نمی شود</h4>
+        </div>
 
         <div class="row" id="reminder">
             <div class="col-xs-12">
@@ -84,7 +87,7 @@
                         <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="document.location.href = '{{route('myQuizes')}}'">بازگشت به مرحله قبل</button>
                     @endif
                 @else
-                    <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="endQuiz()">اتمام ارزیابی</button>
+                    <button class="MyBtn btn-warning" style="width: auto; padding: 10px; border: solid 2px #a4712b;" onclick="endQuiz()">اتمام ارزیابی</button>
                 @endif
             </center>
         </div>

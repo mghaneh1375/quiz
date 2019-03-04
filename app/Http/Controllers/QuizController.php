@@ -789,10 +789,18 @@ class QuizController extends Controller {
         $counter = 0;
         $roq = [];
 
-        $tmpROQ2 = ROQ2::whereUId(Auth::user()->id)->whereQuizId($qId)->first()->result;
-
-        for($i = 0; $i < strlen($tmpROQ2); $i++)
-            $roq[$counter++] = $tmpROQ2[$i];
+        $roq2 = ROQ2::whereUId(Auth::user()->id)->whereQuizId($qId)->first();
+        if($roq2 != null) {
+            $tmpROQ2 = $roq2->result;
+            for ($i = 0; $i < strlen($tmpROQ2); $i++)
+                $roq[$counter++] = $tmpROQ2[$i];
+        }
+        else {
+            $roq2 = DB::select('select r.result from roq r, qoq q WHERE r.qoq_id = q.id and r.u_id = ' . Auth::user()->id . ' and q.quiz_id = ' . $qId);
+            foreach ($roq2 as $itr) {
+                $roq[$counter++] = $itr->result;
+            }
+        }
 
         return view('quiz', array('quizId' => $qId, 'roqs' => $roq, 'questions' => $qInfo,
             'mode' => $mode, 'reminder' => 0));

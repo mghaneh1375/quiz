@@ -176,7 +176,7 @@ Route::group(array('middleware' => ['auth', 'adminLevel']), function (){
 });
 
 Route::group(array('middleware' => ['auth', 'adminLevel']), function (){
-
+    
     Route::get('showRegistrationReport', array('as' => 'showRegistrationReport', 'uses' => 'ReportController@showRegistrationReport'));
 
     Route::post('fetchStudents', array('as' => 'fetchStudents', 'uses' => 'ReportController@fetchStudents'));

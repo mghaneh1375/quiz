@@ -150,6 +150,9 @@
             color: #00AF87;
             content: "\00d7";
         }
+        .MyBtn-blue {
+            color: white !important;
+        }
     </style>
 @stop
 
