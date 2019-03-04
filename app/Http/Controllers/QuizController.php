@@ -19,6 +19,7 @@ use App\models\Transaction;
 use App\models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Larabookir\Gateway\Gateway;
 use PHPExcel_IOFactory;
@@ -642,6 +643,9 @@ class QuizController extends Controller {
 
     public function doQuiz($qId = "", $mode = false) {
 
+        $uId = Auth::user()->id;
+        $verify = '';
+        
         if(isset($_POST["quiz_id"]) || $qId != "") {
 
             $quizTmp = Quiz::whereId($qId);
@@ -651,13 +655,11 @@ class QuizController extends Controller {
                 if($qId == "")
                     $qId = makeValidInput($_POST["quiz_id"]);
 
-                $uId = Auth::user()->id;
-
                 $entry = QEntry::whereQId($qId)->whereUId($uId)->first();
 
                 $mode = "normal";
                 $tL = $quizTmp->tL;
-
+                
                 if($entry == null)
                     return $this->goToDoQuizPage("شما در آزمون مورد نظر ثبت نام نکرده اید");
 
@@ -688,6 +690,8 @@ class QuizController extends Controller {
                         $tmpROQ2->result = $tmpROQ2Str;
                         $tmpROQ2->save();
 
+                        $verify = Hash::make($tmpROQ2->id);
+
                         $tmpROQ2 = $tmpROQ2Str;
 
 //                        $this->fillROQ($qId);
@@ -707,7 +711,11 @@ class QuizController extends Controller {
                         return $this->goToDoQuizPage("شما قبلا در این آزمون شرکت کرده اید");
 
                     $qInfo = getQOQ($qId, false);
-                    $tmpROQ2 = ROQ2::whereUId($uId)->whereQuizId($qId)->first()->result;
+
+                    $tmpROQ2 = ROQ2::whereUId($uId)->whereQuizId($qId)->first();
+                    $verify = Hash::make($tmpROQ2->id);
+
+                    $tmpROQ2 = $tmpROQ2->result;
 
 //                        for ($i = 0; $i < count($qInfo); $i++) {
 //                            $condition = ['u_id' => $uId, 'qoq_id' => $qInfo[$i][count($qInfo[$i]) - 1]];
@@ -752,8 +760,8 @@ class QuizController extends Controller {
                 }
             }
 
-            return view('quiz', array('quizId' => $qId, 'roqs' => $roq, 'questions' => $qInfo,
-                'reminder' => $reminder, 'mode' => $mode));
+            return view('quiz', array('quizId' => $qId, 'roqs' => $roq, 'questions' => $qInfo, 'uId' => $uId,
+                'reminder' => $reminder, 'mode' => $mode, 'verify' => $verify));
         }
 
         return $this->goToDoQuizPage();
@@ -762,9 +770,13 @@ class QuizController extends Controller {
 
     public function submitAllAns() {
 
-        if(isset($_POST["newVals"]) && isset($_POST["quizId"])) {
+        if(isset($_POST["newVals"]) && isset($_POST["quizId"]) && isset($_POST["uId"]) &&
+            isset($_POST["verify"])) {
 
-            $roq = ROQ2::whereUId(Auth::user()->id)->whereQuizId(makeValidInput($_POST["quizId"]))->first();
+            $roq = ROQ2::whereUId(makeValidInput($_POST["uId"]))->whereQuizId(makeValidInput($_POST["quizId"]))->first();
+
+            if(!Hash::check($roq->id, $_POST["verify"]))
+                return;
 
             if($roq != null) {
                 $roq->result = makeValidInput($_POST["newVals"]);

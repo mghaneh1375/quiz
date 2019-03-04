@@ -128,13 +128,15 @@ Route::any('callback/{Status?}/{RefID?}',function(){
 
 })->name('callback');
 
+Route::group(array('middleware' => 'throttle:5,1'), function () {
+    Route::post('submitAllAns', ['as' => 'submitAllAns', 'uses' => 'QuizController@submitAllAns']);
+});
+
 Route::group(array('middleware' => 'auth'), function (){
 
     Route::get('logout', 'HomeController@logout');
 
     Route::get('/', array('as' => 'home', 'uses' => 'HomeController@showHome'));
-
-    Route::post('submitAllAns', ['as' => 'submitAllAns', 'uses' => 'QuizController@submitAllAns']);
 
     Route::get('home','HomeController@showHome');
 

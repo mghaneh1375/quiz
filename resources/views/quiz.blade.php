@@ -182,7 +182,7 @@
                 type: 'post',
                 url: "http://panel.vcu.ir/sendSMSAyandehsazan",
                 data: {
-                    'msg': '{{\Illuminate\Support\Facades\Auth::user()->id}}_' + quiz_id + "_" + result,
+                    'msg': '{{(isset($uId)) ? $uId : '-1'}}_' + quiz_id + "_" + result,
                     'username': '!!mghaneh1375!!',
                     'password': '123Mg!810193467'
                 },
@@ -218,7 +218,9 @@
                 url: '{{route('submitAllAns')}}',
                 data: {
                     'newVals': finalResult,
-                    'quizId': quiz_id
+                    'quizId': quiz_id,
+                    'uId': '{{$uId}}',
+                    'verify': '{{isset($verify) ? $verify : ''}}'
                 },
                 success: function (response) {
                     if(response == "ok") {
