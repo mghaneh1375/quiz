@@ -82,6 +82,9 @@
             <div class="col-xs-12">
                 <center style="margin-top: 20px">
                     <div id="quiz_time" style='font-size: 14px;'></div>
+                    @if($mode != "special")
+                        <button class="MyBtn btn-warning" style="width: auto; padding: 10px; border: solid 2px #a4712b;" onclick="endQuiz()">اتمام ارزیابی</button>
+                    @endif
                 </center>
             </div>
         </div>
@@ -140,8 +143,6 @@
                     @else
                         <button class="MyBtn" style="width: auto; border: solid 2px #a4712b;" onclick="document.location.href = '{{route('myQuizes')}}'">بازگشت به مرحله قبل</button>
                     @endif
-                @else
-                    <button class="MyBtn btn-warning" style="width: auto; padding: 10px; border: solid 2px #a4712b;" onclick="endQuiz()">اتمام ارزیابی</button>
                 @endif
             </center>
         </div>
@@ -219,7 +220,7 @@
                 data: {
                     'newVals': finalResult,
                     'quizId': quiz_id,
-                    'uId': '{{$uId}}',
+                    'uId': '{{isset($uId) ? $uId : ''}}',
                     'verify': '{{isset($verify) ? $verify : ''}}'
                 },
                 success: function (response) {

@@ -99,8 +99,9 @@ class KarnameController extends Controller {
             $myQuizes = QEntry::whereUId($uId)->select('q_id')->get();
             $quizes = array();
             for($i = 0; $i < count($myQuizes); $i++)
-                $quizes[$i] = Quiz::whereId($myQuizes[$i]->q_id)->select('id', 'QN')->first();
+                $quizes[$i] = Quiz::where('id', '=', $myQuizes[$i]->q_id)->select('id', 'QN')->first();
         }
+
         return view('karname', array('quizes' => $quizes, 'msg' => $msg, 'selectedQuiz' => $quizId));
     }
 

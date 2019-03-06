@@ -30,6 +30,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property string $password
  * @method static \Illuminate\Database\Query\Builder|\App\models\User whereUsername($value)
  * @method static \Illuminate\Database\Query\Builder|\App\models\User wherePhoneNum($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\models\User whereGradeId($value)
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @mixin \Eloquent

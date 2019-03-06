@@ -233,10 +233,34 @@ Route::post('checkNID', 'HomeController@checkNID')->name('checkNID');
 
 Route::post('checkPhoneNum', 'HomeController@checkPhoneNum')->name('checkPhoneNum');
 
+//Route::get('fillTable', function() {
+//
+//    $quiz = \App\models\Quiz::all();
+//
+//    foreach ($quiz as $itr) {
+//
+//        $degree = \App\models\DegreeOfQuiz::whereQuizId($itr->id)->first();
+//
+//        if($degree != null) {
+//            $degree = $degree->degree_id;
+//            $users = \App\models\User::whereGradeId($degree)->get();
+//
+//            foreach ($users as $user) {
+//
+//                $tmp = new \App\models\QEntry();
+//                $tmp->u_id = $user->id;
+//                $tmp->q_id = $itr->id;
+//
+//                $tmp->save();
+//            }
+//        }
+//    }
+//
+//});
 
 Route::group(array('middleware' => ['notLogin']), function () {
 
-    Route::get('registration', 'HomeController@registration')->name('registration');
+//    Route::get('registration', 'HomeController@registration')->name('registration');
 
     Route::post('doRegistration', 'HomeController@doRegistration')->name('doRegistration');
 
