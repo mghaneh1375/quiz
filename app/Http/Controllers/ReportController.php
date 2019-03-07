@@ -11,6 +11,7 @@ use App\models\Question;
 use App\models\Quiz;
 use App\models\ROQ;
 use App\models\State;
+use App\models\Survey;
 use App\models\Taraz;
 use App\models\User;
 use Illuminate\Support\Facades\DB;
@@ -1396,6 +1397,99 @@ as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
 
     public function showRegistrationReport() {
         return view('registrationReport', ['grades' => Degree::orderBy('dN', 'ASC')->get(), 'states' => State::orderBy('name', 'ASC')->get()]);
+    }
+
+    public function registrationReportExcel() {
+
+        $whereClause = "c.id = u.city_id and d.id = u.grade_id and role = 0 ";
+
+        $users = DB::select('select concat(u.first_name, " ", u.last_name) as name, u.phone_num, d.dN as grade, c.name as city, u.username, u.subscription ' .
+            'from users_azmoon u, cities c, degree d where ' . $whereClause
+        );
+
+        foreach ($users as $user) {
+
+            switch ($user->subscription) {
+                case 1:
+                    $user->subscription = 'قرارگاه ملی جدید';
+                    break;
+                case 2:
+                    $user->subscription = 'قرارگاه ملی قدیم';
+                    break;
+                case 3:
+                    $user->subscription = 'قرارگاه استانی';
+                    break;
+                default:
+                    $user->subscription = 'سایر';
+                    break;
+            }
+
+        }
+
+        $objPHPExcel = new PHPExcel();
+        $objPHPExcel->getProperties()->setCreator("Gachesefid");
+        $objPHPExcel->getProperties()->setLastModifiedBy("Gachesefid");
+        $objPHPExcel->getProperties()->setTitle("Office 2007 XLSX Test Document");
+        $objPHPExcel->getProperties()->setSubject("Office 2007 XLSX Test Document");
+        $objPHPExcel->getProperties()->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.");
+
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        $objPHPExcel->getActiveSheet()->setCellValue('F1', 'نوع عضویت');
+        $objPHPExcel->getActiveSheet()->setCellValue('E1', 'شماره تماس');
+        $objPHPExcel->getActiveSheet()->setCellValue('D1', 'شهر');
+        $objPHPExcel->getActiveSheet()->setCellValue('C1', 'پایه تحصیلی');
+        $objPHPExcel->getActiveSheet()->setCellValue('B1', 'نام کاربری');
+        $objPHPExcel->getActiveSheet()->setCellValue('A1', 'نام');
+
+        $i = 2;
+        foreach($users as $user) {
+            $objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $user->name);
+            $objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $user->username);
+            $objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $user->city);
+            $objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $user->grade);
+            $objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $user->phone_num);
+            $objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $user->subscription);
+            $i++;
+        }
+
+        $fileName = __DIR__ . "/../../../public/tmp/A4.xlsx";
+
+        $objPHPExcel->getActiveSheet()->setTitle('گزارش گیری دانش آموزان');
+
+        $objWriter = new PHPExcel_Writer_Excel2007($objPHPExcel);
+        $objWriter->save($fileName);
+
+        if (file_exists($fileName)) {
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="'.basename($fileName).'"');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($fileName));
+            readfile($fileName);
+            unlink($fileName);
+        }
+
+        return Redirect::route('showRegistrationReport');
+    }
+
+    public function surveyReport() {
+
+        $surveys = Survey::all();
+        $answers = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+
+        foreach ($surveys as $survey) {
+            $result = $survey->result;
+
+            for($i = 0; $i < strlen($result); $i++) {
+                $answers[$i][$result[$i]] = $answers[$i][$result[$i]] + 1;
+            }
+
+        }
+
+        return view('surveyReport', ['answers' => $answers]);
     }
 
     public function fetchStudents() {

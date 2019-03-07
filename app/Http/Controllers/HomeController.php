@@ -4,17 +4,21 @@ namespace App\Http\Controllers;
 
 use App\models\City;
 use App\models\Degree;
+use App\models\DegreeOfQuiz;
 use App\models\QEntry;
 use App\models\QOQ;
 use App\models\Quiz;
 use App\models\ROQ;
 use App\models\ROQ2;
 use App\models\State;
+use App\models\Survey;
 use App\models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\URL;
 use PHPExcel;
 use PHPExcel_IOFactory;
 
@@ -77,9 +81,129 @@ class HomeController extends Controller {
 //            $std->save();
 //        }
 //    }
-    
+
+    public function survey() {
+        return view('survey');
+    }
+
+    public function doSurvey() {
+
+        if(isset($_POST["ans"])) {
+            $tmp = new Survey();
+            $tmp->result = makeValidInput($_POST["ans"]);
+            $tmp->u_id = Auth::user()->id;
+            $tmp->save();
+        }
+    }
+
+    public function getPic() {
+
+        $pic = Auth::user()->pic;
+
+        if($pic == null)
+            $pic = URL::asset('images/profile.png');
+        else
+            $pic = URL::asset('profileImages/' . $pic);
+
+        return view('getPic', ['pic' => $pic]);
+    }
+
+    public function setProfilePic() {
+
+        if(isset($_FILES["pic"])) {
+
+            $file = $_FILES["pic"]["name"];
+
+            if(!empty($file)) {
+
+                $path = __DIR__ . '/../../../public/profileImages/' . $file;
+
+                $err = uploadCheck($path, "pic", "تعیین عکس پروفایل", 20000000, -1);
+
+                if (empty($err)) {
+                    upload($path, "pic", "تعیین عکس پروفایل");
+                    $user = Auth::user();
+                    $user->pic = $file;
+                    $user->save();
+
+                    return Redirect::route('getPic');
+                }
+            }
+        }
+    }
+
 	public function showHome() {
 //        $this->createTestForQuizes();
+
+        $degree = Auth::user()->grade_id;
+        $quiz_id = DegreeOfQuiz::whereDegreeId($degree)->select('quiz_id')->first();
+
+        if($quiz_id != null) {
+
+            $quizId = $quiz_id->quiz_id;
+
+            $users = DB::select('SELECT qR.id, qR.u_id, sum(taraz.taraz * (SELECT lesson.coherence FROM lessons as lesson WHERE lesson.id = taraz.l_id)) as weighted_avg ' .
+                'from qentry qR, taraz WHERE qR.id = taraz.q_entry_id and qR.q_id = ' . $quizId .
+                " and (select count(*) from roq r, qoq Q where r.u_id = qR.u_id and r.qoq_id = Q.id and Q.quiz_id = qR.q_id) > 0 " .
+                'GROUP by (qR.id) ORDER by weighted_avg DESC limit 0, 10');
+
+            $tmp = DB::select('SELECT DISTINCT L.id, L.nameL, L.coherence from lessons L, questions Q, subjects S, qoq QO WHERE QO.quiz_id = ' . $quizId . ' and QO.question_id = Q.id and Q.subject_id = S.id and S.id_l = L.id order by L.id ASC');
+            $sum = 0;
+
+            if ($tmp == null || count($tmp) == 0)
+                $sum = 1;
+
+            else {
+                foreach ($tmp as $itr) {
+                    $sum += $itr->coherence;
+                }
+            }
+
+            for ($i = 0; $i < count($users); $i++)
+                $users[$i]->rank = ($i + 1);
+
+
+            $preTaraz = (count($users) > 0) ? round($users[0]->weighted_avg / $sum, 0) : 0;
+
+            for ($i = 1; $i < count($users); $i++) {
+
+                if ($preTaraz == round($users[$i]->weighted_avg / $sum, 0))
+                    $users[$i]->rank = $users[$i - 1]->rank;
+                else
+                    $preTaraz = $users[$i - 1]->rank;
+            }
+
+            $i = 0;
+            foreach ($users as $user) {
+
+                $tmp = DB::select('select lesson.nameL as name, lesson.coherence, taraz.percent, taraz.taraz from taraz, lessons as lesson WHERE taraz.q_entry_id = ' . $user->id .
+                    ' and lesson.id = taraz.l_id');
+
+                $user->lessons = $tmp;
+
+                $target = User::whereId($user->u_id);
+
+                if ($target == null) {
+                    array_splice($users, $i);
+                    continue;
+                }
+
+                $i++;
+                $user->name = $target->first_name . " " . $target->last_name;
+                $user->uId = $target->id;
+
+                $cityAndState = getStdCityAndState($target->id);
+                $user->city = $cityAndState['city'];
+                $user->state = $cityAndState['state'];
+            }
+
+            usort($users, function ($a, $b) {
+                return $a->rank - $b->rank;
+            });
+
+            return view('home2', ['users' => $users]);
+        }
+
         return view('home');
 	}
     

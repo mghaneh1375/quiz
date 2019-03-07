@@ -40,6 +40,8 @@
 
         <div style="margin: 10px"><span>تعداد رکورد های پیدا شده:</span><span>&nbsp;</span><span id="records"></span></div>
 
+        <div><button onclick="document.location.href = '{{route('registrationReportExcel')}}'" class="btn btn-primary">دانلود فایل اکسل</button></div>
+
         <div style="overflow-x: auto">
 
             <div class="filter">

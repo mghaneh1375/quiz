@@ -4,7 +4,40 @@
 
 @section('reminder')
 
-    <center class="col-xs-12">
+    <style>
+
+        @media only screen and (max-width:767px) {
+            .fillWidthOnMobile {
+                width: 100%;
+            }
+        }
+
+        #warning {
+            display: none !important;
+        }
+
+        .notWarning {
+            display: block !important;
+        }
+
+        @media screen and (min-width: 320px) and (max-width: 767px) and (orientation: portrait) {
+            #warning {
+                display: block !important;
+            }
+            .notWarning {
+                display: none !important;
+            }
+        }
+
+    </style>
+
+    <div class="col-xs-12 fillWidthOnMobile">
+        <div id="warning" class="hidden" style="margin-top: 100px">
+            <center><p class="errorText">برای نمایش بهتر گوشی خود را در حالت افقی قرار دهید</p></center>
+        </div>
+    </div>
+
+    <center class="col-xs-12 notWarning">
 
         @if(count($quizes) == 0)
             <p class="single-error warning_color">آزمونی جهت ورود به آن موجود نیست</p>

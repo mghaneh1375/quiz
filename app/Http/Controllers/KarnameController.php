@@ -7,6 +7,7 @@ use App\models\KindKarname;
 use App\models\QEntry;
 use App\models\Quiz;
 use App\models\QuizStatus;
+use App\models\Survey;
 use App\models\Taraz;
 use App\models\User;
 use Illuminate\Support\Facades\Auth;
@@ -59,6 +60,10 @@ class KarnameController extends Controller {
     public function seeResult($quizId = "") {
 
         $uId = Auth::user()->id;
+
+        if(Survey::whereUId($uId)->count() == 0)
+            return Redirect::route('survey');
+
         $msg = "";
 
         if(isset($_POST["getKarname"])) {

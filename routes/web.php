@@ -144,6 +144,10 @@ Route::group(array('middleware' => 'auth'), function (){
 
     Route::get('seeResult/{quiz_id}', array('as' => 'seeResult', 'uses' => 'KarnameController@seeResult'));
 
+    Route::get('survey', ['as' => 'survey', 'uses' => 'HomeController@survey']);
+
+    Route::post('doSurvey', ['as' => 'doSurvey', 'uses' => 'HomeController@doSurvey']);
+
     Route::any('doQuiz/{qId?}/{mode?}', 'QuizController@doQuiz')->name('doQuiz');
 
     Route::get('seeQuiz/{qId?}', 'QuizController@seeQuiz')->name('seeQuiz');
@@ -152,6 +156,10 @@ Route::group(array('middleware' => 'auth'), function (){
 
     Route::get('myQuizes', 'QuizController@myQuizes')->name('myQuizes');
 
+    Route::get('getPic', 'HomeController@getPic')->name('getPic');
+
+    Route::post('setProfilePic', 'HomeController@setProfilePic')->name('setProfilePic');
+    
     Route::get('buySelectedQuiz/{quizId}', 'QuizController@buySelectedQuiz')->name('buySelectedQuiz');
     
     Route::post('submitAns', 'AjaxController@submitAns')->name('submitAns');
@@ -179,8 +187,12 @@ Route::group(array('middleware' => ['auth', 'adminLevel']), function (){
 
 Route::group(array('middleware' => ['auth', 'adminLevel']), function (){
     
+    Route::get('surveyReport', 'ReportController@surveyReport')->name('surveyReport');
+    
     Route::get('showRegistrationReport', array('as' => 'showRegistrationReport', 'uses' => 'ReportController@showRegistrationReport'));
 
+    Route::get('registrationReportExcel', array('as' => 'registrationReportExcel', 'uses' => 'ReportController@registrationReportExcel'));
+    
     Route::post('fetchStudents', array('as' => 'fetchStudents', 'uses' => 'ReportController@fetchStudents'));
 
     Route::get('reports/{quiz_id}', array('as' => 'reports', 'uses' => 'ReportController@reports'));
@@ -260,7 +272,7 @@ Route::post('checkPhoneNum', 'HomeController@checkPhoneNum')->name('checkPhoneNu
 
 Route::group(array('middleware' => ['notLogin']), function () {
 
-//    Route::get('registration', 'HomeController@registration')->name('registration');
+    Route::get('registration', 'HomeController@registration')->name('registration');
 
     Route::post('doRegistration', 'HomeController@doRegistration')->name('doRegistration');
 
