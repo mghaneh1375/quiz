@@ -1524,14 +1524,35 @@ as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
     public function surveyReport() {
 
         $surveys = Survey::all();
-        $answers = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]];
+        $answers = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
 
         foreach ($surveys as $survey) {
-            $result = $survey->result;
+            $result = $survey->result . '';
+
+            if(strlen($result) != 5)
+                dd(strlen($result));
 
             for($i = 0; $i < strlen($result); $i++) {
-                if($result[$i] > 0 && $result[$i] < 5)
-                    $answers[$i][$result[$i]] = $answers[$i][$result[$i]] + 1;
+
+                if($i > 4)
+                    break;
+
+                try {
+                    if ($i != 2) {
+                        if ($result[$i] > 0 && $result[$i] < 5)
+                            $answers[$i][$result[$i] - 1] = $answers[$i][$result[$i] - 1] + 1;
+                        else
+                            dd($result)[$i];
+                    } else {
+                        if ($result[$i] > 0 && $result[$i] < 4)
+                            $answers[$i][$result[$i] - 1] = $answers[$i][$result[$i] - 1] + 1;
+                        else
+                            dd($result[$i]);
+                    }
+                }
+                catch (\Exception $x) {
+                    dd('exception ' . $result . ' ' . $answers[$i][$result[$i]]);
+                }
             }
 
         }
