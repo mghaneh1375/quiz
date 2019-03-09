@@ -119,6 +119,8 @@
                         newElement += '<td><center>نام</center></td>';
                         newElement += '<td><center>نام کاربری</center></td>';
                         newElement += '<td><center>شهر</center></td>';
+                        newElement += '<td><center>استان</center></td>';
+                        newElement += '<td><center>جنسیت</center></td>';
                         newElement += '<td><center>پایه تحصیلی</center></td>';
                         newElement += '<td><center>شماره همراه</center></td>';
                         newElement += '<td><center>نوع عضویت</center></td>';
@@ -129,6 +131,11 @@
                             newElement += "<td><center>" + response[i].name + "</center></td>";
                             newElement += "<td><center>" + response[i].username + "</center></td>";
                             newElement += "<td><center>" + response[i].city + "</center></td>";
+                            newElement += "<td><center>" + response[i].stateName + "</center></td>";
+                            if(response[i].sex_id == 1)
+                                newElement += "<td><center>مرد</center></td>";
+                            else
+                                newElement += "<td><center>زن</center></td>";
                             newElement += "<td><center>" + response[i].grade + "</center></td>";
                             newElement += "<td><center>" + response[i].phone_num + "</center></td>";
                             newElement += "<td><center>" + response[i].subscription + "</center></td>";

@@ -667,7 +667,7 @@ class QuizController extends Controller {
 
                     $tmp = $this->checkDate($qId);
                     
-                    if($tmp != "0" && $tmp != "-1") {
+                    if(($tmp != "0" && $tmp != "-1") || $uId == 2089) {
 
                         $entry->timeEntry = time();
                         $entry->status = 0;
@@ -680,7 +680,7 @@ class QuizController extends Controller {
 
                         $tmpROQ2Str = "";
                         $qInfo = getQOQ($qId, false);
-
+                        
                         for ($i = 0; $i < count($qInfo); $i++)
                             $tmpROQ2Str .= "0";
 
@@ -754,9 +754,13 @@ class QuizController extends Controller {
             $reminder = ($tL * 60 - time() + $startTime);
 
             if($quizTmp->eDate == $today["date"]) {
-                $tmp = subTimes($quizTmp->eTime, $today['time']);
-                if($reminder > $tmp) {
-                    $reminder = $tmp;
+
+                if($uId != 2089) {
+
+                    $tmp = subTimes($quizTmp->eTime, $today['time']);
+                    if ($reminder > $tmp) {
+                        $reminder = $tmp;
+                    }
                 }
             }
 
@@ -842,7 +846,8 @@ class QuizController extends Controller {
                 ($quiz->sDate == $date && $quiz->sTime <= $time && (
                         ($quiz->sDate == $quiz->eDate && $quiz->eTime > $time) ||
                         ($quiz->sDate != $quiz->eDate) ||
-                        ($quiz->eDate == $date && $quiz->eTime > $time)
+                        ($quiz->eDate == $date && $quiz->eTime > $time) ||
+                        ($uId == 2089)
                     )
                 )) {
 

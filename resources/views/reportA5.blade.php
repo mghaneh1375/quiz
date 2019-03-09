@@ -55,6 +55,10 @@
                     <td><center>نام و نام خانوادگی</center></td>
                     <td><center>شهر</center></td>
                     <td><center>استان</center></td>
+                    <td><center>جنسیت</center></td>
+                    <td><center>شماره همراه</center></td>
+                    <td><center>نوع عضویت</center></td>
+
                     @if(count($users) > 0)
                         @foreach($users[0]->lessons as $itr)
                             <td><center>{{$itr->name}}</center></td>
@@ -74,6 +78,10 @@
                         <td><center>{{$user->name}}</center></td>
                         <td><center>{{$user->city}}</center></td>
                         <td><center>{{$user->state}}</center></td>
+                        <td><center>{{($user->sex_id == 1) ? 'مرد' : 'زن'}}</center></td>
+                        <td><center>{{$user->phone_num}}</center></td>
+                        <td><center>{{$user->subscription}}</center></td>
+
                         @foreach($user->lessons as $itr)
                             <?php
                                 if($itr->coherence == 0) {

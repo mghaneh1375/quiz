@@ -572,6 +572,24 @@ cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry.u_id a
 
             $i++;
             $user->name = $target->first_name . " " . $target->last_name;
+            $user->phone_num = $target->phone_num;
+            $user->sex_id = $target->sex_id;
+
+            switch ($target->subscription) {
+                case 1:
+                    $user->subscription = 'قرارگاه ملی جدید';
+                    break;
+                case 2:
+                    $user->subscription = 'قرارگاه ملی قدیم';
+                    break;
+                case 3:
+                    $user->subscription = 'قرارگاه استانی';
+                    break;
+                default:
+                    $user->subscription = 'سایر';
+                    break;
+            }
+
             $user->uId = $target->id;
 
             $cityAndState = getStdCityAndState($target->id);
@@ -635,6 +653,24 @@ cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry.u_id a
 
             $target = User::whereId($user->u_id);
             $user->name = $target->first_name . " " . $target->last_name;
+            $user->phone_num = $target->phone_num;
+            $user->sex_id = $target->sex_id;
+
+            switch ($target->subscription) {
+                case 1:
+                    $user->subscription = 'قرارگاه ملی جدید';
+                    break;
+                case 2:
+                    $user->subscription = 'قرارگاه ملی قدیم';
+                    break;
+                case 3:
+                    $user->subscription = 'قرارگاه استانی';
+                    break;
+                default:
+                    $user->subscription = 'سایر';
+                    break;
+            }
+
             $user->uId = $target->id;
 
             $cityAndState = getStdCityAndState($target->id);
@@ -660,11 +696,14 @@ cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry.u_id a
 
         $objPHPExcel->setActiveSheetIndex(0);
 
+        $objPHPExcel->getActiveSheet()->setCellValue('F1', 'نوع عضویت');
+        $objPHPExcel->getActiveSheet()->setCellValue('E1', 'شماره همراه');
+        $objPHPExcel->getActiveSheet()->setCellValue('D1', 'جنسیت');
         $objPHPExcel->getActiveSheet()->setCellValue('C1', 'استان');
         $objPHPExcel->getActiveSheet()->setCellValue('B1', 'شهر');
         $objPHPExcel->getActiveSheet()->setCellValue('A1', 'نام و نام خانوادگی');
 
-        $j = 'D';
+        $j = 'G';
 
         if(count($users) > 0) {
             foreach($users[0]->lessons as $itr) {
@@ -691,8 +730,11 @@ cities as cities WHERE qentry.q_id = " . $quizId . " and std_.id = qentry.u_id a
             $objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $user->name);
             $objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $user->city);
             $objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $user->state);
+            $objPHPExcel->getActiveSheet()->setCellValue('D' . $i, ($user->sex_id == 1) ? 'مرد' : 'زن');
+            $objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $user->phone_num);
+            $objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $user->subscription);
 
-            $j = 'D';
+            $j = 'G';
 
             foreach($user->lessons as $itr) {
                 if($itr->coherence == 0) {
@@ -1403,8 +1445,8 @@ as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
 
         $whereClause = "c.id = u.city_id and d.id = u.grade_id and role = 0 ";
 
-        $users = DB::select('select concat(u.first_name, " ", u.last_name) as name, u.phone_num, d.dN as grade, c.name as city, u.username, u.subscription ' .
-            'from users_azmoon u, cities c, degree d where ' . $whereClause
+        $users = DB::select('select u.sex_id, s.name as stateName, concat(u.first_name, " ", u.last_name) as name, u.phone_num, d.dN as grade, c.name as city, u.username, u.subscription ' .
+            'from users_azmoon u, cities c, degree d, states s where s.id = c.state_id and ' . $whereClause
         );
 
         foreach ($users as $user) {
@@ -1435,8 +1477,10 @@ as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
 
         $objPHPExcel->setActiveSheetIndex(0);
 
-        $objPHPExcel->getActiveSheet()->setCellValue('F1', 'نوع عضویت');
-        $objPHPExcel->getActiveSheet()->setCellValue('E1', 'شماره تماس');
+        $objPHPExcel->getActiveSheet()->setCellValue('H1', 'نوع عضویت');
+        $objPHPExcel->getActiveSheet()->setCellValue('G1', 'شماره تماس');
+        $objPHPExcel->getActiveSheet()->setCellValue('F1', 'جنسیت');
+        $objPHPExcel->getActiveSheet()->setCellValue('E1', 'استان');
         $objPHPExcel->getActiveSheet()->setCellValue('D1', 'شهر');
         $objPHPExcel->getActiveSheet()->setCellValue('C1', 'پایه تحصیلی');
         $objPHPExcel->getActiveSheet()->setCellValue('B1', 'نام کاربری');
@@ -1446,10 +1490,12 @@ as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
         foreach($users as $user) {
             $objPHPExcel->getActiveSheet()->setCellValue('A' . $i, $user->name);
             $objPHPExcel->getActiveSheet()->setCellValue('B' . $i, $user->username);
-            $objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $user->city);
-            $objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $user->grade);
-            $objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $user->phone_num);
-            $objPHPExcel->getActiveSheet()->setCellValue('F' . $i, $user->subscription);
+            $objPHPExcel->getActiveSheet()->setCellValue('C' . $i, $user->grade);
+            $objPHPExcel->getActiveSheet()->setCellValue('D' . $i, $user->city);
+            $objPHPExcel->getActiveSheet()->setCellValue('E' . $i, $user->stateName);
+            $objPHPExcel->getActiveSheet()->setCellValue('F' . $i, ($user->sex_id == 1) ? 'مرد' : 'زن');
+            $objPHPExcel->getActiveSheet()->setCellValue('G' . $i, $user->phone_num);
+            $objPHPExcel->getActiveSheet()->setCellValue('H' . $i, $user->subscription);
             $i++;
         }
 
@@ -1478,13 +1524,14 @@ as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
     public function surveyReport() {
 
         $surveys = Survey::all();
-        $answers = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+        $answers = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]];
 
         foreach ($surveys as $survey) {
             $result = $survey->result;
 
             for($i = 0; $i < strlen($result); $i++) {
-                $answers[$i][$result[$i]] = $answers[$i][$result[$i]] + 1;
+                if($result[$i] > 0 && $result[$i] < 5)
+                    $answers[$i][$result[$i]] = $answers[$i][$result[$i]] + 1;
             }
 
         }
@@ -1512,8 +1559,8 @@ as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
                 $whereClause .= 'and u.subscription = ' . $subscription;
 
 
-            $users = DB::select('select concat(u.first_name, " ", u.last_name) as name, u.phone_num, d.dN as grade, c.name as city, u.username, u.subscription ' .
-                'from users_azmoon u, cities c, degree d where ' . $whereClause
+            $users = DB::select('select u.sex_id, s.name as stateName, concat(u.first_name, " ", u.last_name) as name, u.phone_num, d.dN as grade, c.name as city, u.username, u.subscription ' .
+                'from users_azmoon u, cities c, degree d, states s where s.id = c.state_id and ' . $whereClause
             );
 
             foreach ($users as $user) {
