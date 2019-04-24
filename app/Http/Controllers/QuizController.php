@@ -778,7 +778,7 @@ class QuizController extends Controller {
             isset($_POST["verify"])) {
 
             $roq = ROQ2::whereUId(makeValidInput($_POST["uId"]))->whereQuizId(makeValidInput($_POST["quizId"]))->first();
-
+            
             if(!Hash::check($roq->id, $_POST["verify"]))
                 return;
 
@@ -887,7 +887,8 @@ class QuizController extends Controller {
 
     public function buyQuiz() {
 
-        $quizes = Quiz::all();
+        $quizes = DB::select('select q.* from quiz q, degree_of_quiz dq WHERE dq.quiz_id = q.id and dq.degree_id = ' . Auth::user()->grade_id);
+//        $quizes = Quiz::all();
         $today = getToday();
         $date = $today["date"];
         $time = $today["time"];
