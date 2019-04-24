@@ -229,8 +229,9 @@
 
     <div class="popup hidden" id="popup">
         <div style="padding: 40px; direction: rtl; width: fit-content; margin: 0 auto; text-align: center">
-            <p>ثبت نام شما با موفقیت انجام شد.</p>
+            <p>عضویت شما  در سامانه آزمون بر خط با موفقیت انجام شد.</p>
             <p>نام کاربری شما کد ملی شما و رمزعبورتان شماره تلفن همراهتان می باشد.</p>
+            <p>لطفا برای ثبت نام خود در آزمون مورد نظر در سامانه ورود کرده و مراحل را طی کنید</p>
             <button onclick="redirect()">تایید</button>
         </div>
     </div>
