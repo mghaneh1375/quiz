@@ -8,7 +8,7 @@
 
     @include('layouts.mainLibraries')
 
-    <title>ورود</title>
+    <title>ورود به سامانه</title>
 
     <style>
 
@@ -38,7 +38,7 @@
     <center>
 
         <h3 class="title">
-            ورود
+            ورود به سامانه
         </h3>
 
     </center>
