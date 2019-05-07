@@ -192,6 +192,10 @@ Route::group(array('middleware' => ['auth', 'adminLevel']), function (){
     Route::get('showRegistrationReport', array('as' => 'showRegistrationReport', 'uses' => 'ReportController@showRegistrationReport'));
 
     Route::get('registrationReportExcel', array('as' => 'registrationReportExcel', 'uses' => 'ReportController@registrationReportExcel'));
+
+    Route::get('showQuizReport/{quizId?}', array('as' => 'showQuizReport', 'uses' => 'ReportController@showQuizReport'));
+
+    Route::post('fetchStudentsInQuiz', array('as' => 'fetchStudentsInQuiz', 'uses' => 'ReportController@fetchStudentsInQuiz'));
     
     Route::post('fetchStudents', array('as' => 'fetchStudents', 'uses' => 'ReportController@fetchStudents'));
 

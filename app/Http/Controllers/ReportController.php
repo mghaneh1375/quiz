@@ -23,6 +23,64 @@ class ReportController extends Controller {
 
     private $girlSex = 0;
 
+    public function showQuizReport($quizId = "") {
+
+        if(empty($quizId))
+            return view('chooseQuiz', ['quizes' => Quiz::all()]);
+
+        $quiz = Quiz::whereId($quizId);
+        if($quiz == null)
+            return Redirect::route('showQuizReport');
+
+        return view('quizRegistrationReport', ['quiz' => $quiz, 'states' => State::all()]);
+    }
+
+    public function fetchStudentsInQuiz() {
+
+        if(isset($_POST["state"]) && isset($_POST["quizId"]) && isset($_POST["sex"]) && isset($_POST["subscription"])) {
+
+            $state = makeValidInput($_POST["state"]);
+            $sex = makeValidInput($_POST["sex"]);
+            $subscription = makeValidInput($_POST["subscription"]);
+            $quizId = makeValidInput($_POST["quizId"]);
+
+            $whereClause = "";
+
+            if($state != -1)
+                $whereClause .= ' and c.state_id = ' . $state . ' ';
+
+            if($sex != -1)
+                $whereClause .= ' and u.sex_id = ' . $sex . ' ';
+
+            if($subscription != -1)
+                $whereClause .= ' and u.subscription = ' . $subscription;
+
+            $users = DB::select('select u.username, u.first_name, u.last_name, u.phone_num, u.subscription, u.sex_id, c.name as cityName, s.name as stateName from qentry q, users_azmoon u, cities c, states s WHERE q.u_id = u.id and u.city_id = c.id and c.state_id = s.id and q.q_id = ' . $quizId . $whereClause);
+
+            foreach ($users as $user) {
+                $user->sex_id = ($user->sex_id) ? "پسر" : "دختر";
+                $user->name = $user->first_name . ' ' . $user->last_name;
+                switch ($user->subscription) {
+                    case 1:
+                        $user->subscription = 'قرارگاه ملی جدید';
+                        break;
+                    case 2:
+                        $user->subscription = 'قرارگاه ملی قدیم';
+                        break;
+                    case 3:
+                        $user->subscription = 'قرارگاه استانی';
+                        break;
+                    default:
+                        $user->subscription = 'سایر';
+                        break;
+                }
+            }
+
+            echo json_encode($users);
+        }
+
+    }
+
     public function showReport() {
         return view('showReport', array('quizes' => Quiz::all()));
     }
