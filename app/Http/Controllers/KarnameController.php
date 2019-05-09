@@ -62,7 +62,7 @@ class KarnameController extends Controller {
         $uId = Auth::user()->id;
 
         if(Survey::whereUId($uId)->count() == 0)
-            return Redirect::route('survey');
+            return Redirect::route('survey', ['quizId' => $quizId]);
 
         $msg = "";
 

@@ -7,7 +7,7 @@
 @section('reminder')
 
     <script>
-        var q1 = 1, q2 = 1, q3 = 1, q4 = 1, q5 = 1;
+        var q1 = 1, q2 = 1, q3 = 1, q4 = 1, q5 = 1, q6 = 1;
     </script>
 
     <center class="col-xs-12" style="margin-top: 100px">
@@ -54,6 +54,14 @@
             </div>
 
             <div class="col-xs-12" style="margin-top: 10px">
+                <p>نحوه آشنایی با زمان برگزاری آزمون های آزمایشی آنلاین(برخط) آینده سازان از چه طریق بوده است؟</p>
+                <span onclick="q6 = 1; $('.q6').removeClass('btn-success').addClass('btn-default'); $(this).removeClass('btn-default').addClass('btn-success')" class="btn btn-default q6">اطلاع رسانی مسئول اتحادیه استان</span>
+                <span onclick="q6 = 2; $('.q6').removeClass('btn-success').addClass('btn-default'); $(this).removeClass('btn-default').addClass('btn-success')" class="btn btn-default q6">وب سایت موسسه های آینده سازان</span>
+                <span onclick="q6 = 3; $('.q6').removeClass('btn-success').addClass('btn-default'); $(this).removeClass('btn-default').addClass('btn-success')" class="btn btn-default q6">وب سایت اتحادیه انجمن های اسلامی دانش آموزان</span>
+                <span onclick="q6 = 4; $('.q6').removeClass('btn-success').addClass('btn-default'); $(this).removeClass('btn-default').addClass('btn-success')" class="btn btn-default q6">پیام رسان یا کانال های مجازی (سروش، اینستاگرام و ...) موسسه آینده سازان</span>
+            </div>
+
+            <div class="col-xs-12" style="margin-top: 10px">
                 <input onclick="submitAns()" type="submit" class="btn btn-success" value="تایید و مشاهده کارنامه">
             </div>
 
@@ -67,7 +75,8 @@
                 type: 'post',
                 url: '{{route('doSurvey')}}',
                 data: {
-                    'ans': q1 + "" + q2 + "" + q3 + "" + q4 + "" + q5
+                    'ans': q1 + "" + q2 + "" + q3 + "" + q4 + "" + q5 + "" + q6,
+                    'quiz_id': '{{$quiz_id}}'
                 },
                 success: function (response) {
                     document.location.href = '{{URL('seeResult')}}';

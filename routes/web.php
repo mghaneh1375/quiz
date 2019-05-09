@@ -75,6 +75,8 @@ Route::group(array('middleware' => ['auth', 'adminLevel']), function () {
 
 Route::group(array('middleware' => ['auth', 'adminLevel']), function (){
 
+    Route::get('transferFromROQ2ToROQ', 'TarazController@transferFromROQ2ToROQ');
+
     Route::any('createQuiz', 'QuizController@createQuiz');
 
     Route::any('QuizStatus', 'QuizController@QuizStatus');
@@ -144,7 +146,7 @@ Route::group(array('middleware' => 'auth'), function (){
 
     Route::get('seeResult/{quiz_id}', array('as' => 'seeResult', 'uses' => 'KarnameController@seeResult'));
 
-    Route::get('survey', ['as' => 'survey', 'uses' => 'HomeController@survey']);
+    Route::get('survey/{quiz_id}', ['as' => 'survey', 'uses' => 'HomeController@survey']);
 
     Route::post('doSurvey', ['as' => 'doSurvey', 'uses' => 'HomeController@doSurvey']);
 
@@ -186,8 +188,8 @@ Route::group(array('middleware' => ['auth', 'adminLevel']), function (){
 });
 
 Route::group(array('middleware' => ['auth', 'adminLevel']), function (){
-    
-    Route::get('surveyReport', 'ReportController@surveyReport')->name('surveyReport');
+
+    Route::get('surveyReport/{quizId}', 'ReportController@surveyReport')->name('surveyReport');
     
     Route::get('showRegistrationReport', array('as' => 'showRegistrationReport', 'uses' => 'ReportController@showRegistrationReport'));
 

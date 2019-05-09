@@ -158,8 +158,9 @@
 
 @section('reminder')
     <center style="margin-top: 100px;" class="row">
+
         <div class="col-xs-12">
-            <a onclick="showLessonPopUp('{{route('home')}}' + '/questionAnalysis/')" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">گزارش تحلیل سوالات آزمون</button></a>
+            <a href="{{route('surveyReport', ['quizId' => $qId])}}" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">نتایج نظرسنجی</button></a>
         </div>
         <div class="col-xs-12">
             <a onclick="showLessonPopUp('{{route('home')}}' + '/questionDiagramAnalysis/')" style="color: #ffffff;"><button style="min-width: 350px; max-width: 350px;" class="MyBtn MyBtn-blue">گزارش تحلیل سوالات آزمون با کمک منحنی سوال</button></a>

@@ -1579,15 +1579,15 @@ as users WHERE ' . 'q_id = ' . $quizId . ' and users.id = qR.u_id ' .
         return Redirect::route('showRegistrationReport');
     }
 
-    public function surveyReport() {
+    public function surveyReport($quizId) {
 
-        $surveys = Survey::all();
-        $answers = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+        $surveys = Survey::whereQuizId($quizId)->get();
+        $answers = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
 
         foreach ($surveys as $survey) {
             $result = $survey->result . '';
 
-            if(strlen($result) != 5)
+            if(strlen($result) != 6)
                 dd(strlen($result));
 
             for($i = 0; $i < strlen($result); $i++) {

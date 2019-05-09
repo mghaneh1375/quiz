@@ -25,10 +25,6 @@
             <div class="data row">
 
                 <div class="col-xs-12">
-                    <button class="btn btn-primary" onclick="document.location.href = '{{route('surveyReport')}}'">نتایج نظرسنجی</button>
-                </div>
-
-                <div class="col-xs-12">
 
                     <label>
                         <span>آزمون مورد نظر</span>

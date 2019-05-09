@@ -82,16 +82,17 @@ class HomeController extends Controller {
 //        }
 //    }
 
-    public function survey() {
-        return view('survey');
+    public function survey($quiz_id) {
+        return view('survey', ['quiz_id' => $quiz_id]);
     }
 
     public function doSurvey() {
 
-        if(isset($_POST["ans"])) {
+        if(isset($_POST["ans"]) && isset($_POST["quiz_id"])) {
             $tmp = new Survey();
             $tmp->result = makeValidInput($_POST["ans"]);
             $tmp->u_id = Auth::user()->id;
+            $tmp->quiz_id = makeValidInput($_POST["quiz_id"]);
             $tmp->save();
         }
     }
@@ -136,7 +137,7 @@ class HomeController extends Controller {
 //        $this->createTestForQuizes();
 
         $degree = Auth::user()->grade_id;
-        $quiz_id = DegreeOfQuiz::whereDegreeId($degree)->select('quiz_id')->first();
+        $quiz_id = DegreeOfQuiz::whereDegreeId($degree)->where('quiz_id', '>', 16)->select('quiz_id')->first();
 
         if($quiz_id != null) {
 

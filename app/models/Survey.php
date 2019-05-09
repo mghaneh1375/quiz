@@ -10,8 +10,10 @@ use Illuminate\Support\Facades\DB;
  *
  * @property integer $id
  * @property integer $u_id
+ * @property integer $quiz_id
  * @property integer $result
  * @method static \Illuminate\Database\Query\Builder|\App\models\Survey whereUId($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\models\Survey whereQuizId($value)
  */
 
 class Survey extends Model {
